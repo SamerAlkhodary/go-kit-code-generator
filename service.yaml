@@ -1,0 +1,20 @@
+name: chatService
+endpoints:
+  -
+    name: SendMessage
+    args: senderId string , reciverId string, message string
+    output: message string
+  -
+    name: SendImage
+    args: senderId string , reciverId string, img []byte
+    output: message string
+  -
+    name: SendLocation
+    args: senderId string, recieverId string, location string
+    output: message string
+  -
+    name: SendAudio
+    args: senderId string , reciverId string, sound []byte
+    output: message string,ok bool
+  
+
