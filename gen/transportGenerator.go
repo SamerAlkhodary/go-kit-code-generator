@@ -2,7 +2,6 @@ package gen
 
 import (
 	"fmt"
-	"go-kit-code-generator/model"
 	"strings"
 )
 
