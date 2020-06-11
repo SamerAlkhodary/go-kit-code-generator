@@ -15,7 +15,7 @@ func transportGenerator(s model.Service) string {
 	fmt.Fprintf(&code, "r:=mux.NewRouter()\nr.Use(commonMiddleware)\n")
 	for _, endpoint := range s.Endpoints {
 
-		fmt.Fprintf(&code, "r.Method(%q).Path(%q).Handler(httptransport.NewServer(\nendpoints.%s,\ndecode%sRequest,\nencode%sResponse,\n))\n", endpoint.GetTransport()["method"], endpoint.GetTransport()["path"], endpoint.GetName(), endpoint.GetName(), endpoint.GetName())
+		fmt.Fprintf(&code, "r.Methods(%q).Path(%q).Handler(httptransport.NewServer(\nendpoints.%s,\ndecode%sRequest,\nencode%sResponse,\n))\n", endpoint.GetTransport()["method"], endpoint.GetTransport()["path"], endpoint.GetName(), endpoint.GetName(), endpoint.GetName())
 
 	}
 	fmt.Fprintf(&code, "\nreturn r")

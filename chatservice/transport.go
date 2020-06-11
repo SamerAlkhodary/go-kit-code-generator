@@ -2,25 +2,26 @@ package chatService
 
 import (
 	"context"
+	"net/http"
+
 	httptransport "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
-	"net/http"
 )
 
 func NewHTTPServer(ctx context.Context, endPoints Endpoints) http.Handler {
 	r := mux.NewRouter()
 	r.Use(commonMiddleware)
-	r.Method("POST").Path("/user").Handler(httptransport.NewServer(
+	r.Methods("POST").Path("/user").Handler(httptransport.NewServer(
 		endpoints.CreateUser,
 		decodeCreateUserRequest,
 		encodeCreateUserResponse,
 	))
-	r.Method("GET").Path("/user/{id}").Handler(httptransport.NewServer(
+	r.Methods("GET").Path("/user/{id}").Handler(httptransport.NewServer(
 		endpoints.GetUser,
 		decodeGetUserRequest,
 		encodeGetUserResponse,
 	))
-	r.Method("PUT").Path("/user/update").Handler(httptransport.NewServer(
+	r.Methods("PUT").Path("/user/update").Handler(httptransport.NewServer(
 		endpoints.UpdateUser,
 		decodeUpdateUserRequest,
 		encodeUpdateUserResponse,

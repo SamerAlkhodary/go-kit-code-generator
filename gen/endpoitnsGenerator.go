@@ -31,14 +31,11 @@ func endpointsGenerator(s model.Service) string {
 		}
 		fmt.Fprintf(&code, "error:=s.%s(", endpoint.GetName())
 
-		for i, arg := range endpoint.GetArgs() {
-			fmt.Fprintf(&code, "req.%s", endpoint.GetVariableName(arg, false))
-			if i < len(endpoint.GetArgs())-1 {
-				fmt.Fprintf(&code, ",")
+		for _, arg := range endpoint.GetArgs() {
+			fmt.Fprintf(&code, "req.%s,", endpoint.GetVariableName(arg, false))
 
-			}
 		}
-		fmt.Fprintf(&code, ")\nreturn %sResponse{", endpoint.GetName())
+		fmt.Fprintf(&code, "ctx)\nreturn %sResponse{", endpoint.GetName())
 		for _, out := range endpoint.GetOutputs() {
 			fmt.Fprintf(&code, "%s: %s,", endpoint.GetVariableName(out, false), endpoint.GetVariableName(out, true))
 		}
@@ -52,11 +49,11 @@ func endpointsGenerator(s model.Service) string {
 	}
 	fmt.Fprintf(&code, "%s\n", "}")
 
-	fmt.Fprintf(&code, "func MakeEndpoints(s %s)Endpoints{\n return Endpoints{\n", s.Name)
+	fmt.Fprintf(&code, "func MakeEndpoints(s %s)Endpoints{\n return Endpoints{\n", s.GetInterfaceName())
 
 	for _, endpoint := range s.Endpoints {
 
-		fmt.Fprintf(&code, "%s:make%s(s),\n", endpoint.GetName(), endpoint.GetName())
+		fmt.Fprintf(&code, "%s:make%sEndpoint(s),\n", endpoint.GetName(), endpoint.GetName())
 
 	}
 
