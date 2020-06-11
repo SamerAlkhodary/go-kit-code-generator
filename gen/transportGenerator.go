@@ -11,11 +11,11 @@ func transportGenerator(s model.Service) string {
 	code.Grow(1000)
 	fmt.Fprintf(&code, "package %s\n", s.GetServiceName())
 	fmt.Fprintf(&code, "import(httptransport %q\n%q\n%q\n%q)\n", "github.com/go-kit/kit/transport/http", "context", "github.com/gorilla/mux", "net/http")
-	fmt.Fprintf(&code, "func NewHTTPServer(ctx context.Context,endPoints Endpoints)http.Handler{\n")
+	fmt.Fprintf(&code, "func NewHTTPServer(ctx context.Context,endpoints Endpoints)http.Handler{\n")
 	fmt.Fprintf(&code, "r:=mux.NewRouter()\nr.Use(commonMiddleware)\n")
 	for _, endpoint := range s.Endpoints {
 
-		fmt.Fprintf(&code, "r.Methods(%q).Path(%q).Handler(httptransport.NewServer(\nendpoints.%s,\ndecode%sRequest,\nencode%sResponse,\n))\n", endpoint.GetTransport()["method"], endpoint.GetTransport()["path"], endpoint.GetName(), endpoint.GetName(), endpoint.GetName())
+		fmt.Fprintf(&code, "r.Methods(%q).Path(%q).Handler(httptransport.NewServer(\nendpoints.%s,\ndecode%sRequest,\nencodeResponse,\n))\n", endpoint.GetTransport()["method"], endpoint.GetTransport()["path"], endpoint.GetName(), endpoint.GetName())
 
 	}
 	fmt.Fprintf(&code, "\nreturn r")

@@ -37,13 +37,13 @@ func (gen *generator) Generate() {
 	serviceCode := serviceGenerator(*service)
 	transportCode := transportGenerator(*service)
 	encodersCode := encoderDecoderGenerator(*service)
-	mainCode := mainCodeGenerator(*service)
+	serverCode := mainCodeGenerator(*service)
 	endpath := fmt.Sprintf("%s/endpoints.go", gen.outputPath)
 	servicepath := fmt.Sprintf("%s/service.go", gen.outputPath)
 	transportPath := fmt.Sprintf("%s/transport.go", gen.outputPath)
 	encodersPath := fmt.Sprintf("%s/encoders.go", gen.outputPath)
-	mainPath := fmt.Sprintf("%s/main.go", gen.outputPath)
-	mainFile, err := os.Create(mainPath)
+	serverPath := fmt.Sprintf("%s/server.go", gen.outputPath)
+	serverFile, err := os.Create(serverPath)
 	encodersFile, err := os.Create(encodersPath)
 	endFile, err := os.Create(endpath)
 	serviceFile, err := os.Create(servicepath)
@@ -52,7 +52,7 @@ func (gen *generator) Generate() {
 	if err != nil {
 		log.Printf("error while creating file:%v", err)
 	}
-	defer mainFile.Close()
+	defer serverFile.Close()
 	defer transportFile.Close()
 	defer serviceFile.Close()
 	defer encodersFile.Close()
@@ -61,5 +61,5 @@ func (gen *generator) Generate() {
 	endFile.WriteString(endCode)
 	serviceFile.WriteString(serviceCode)
 	encodersFile.WriteString(encodersCode)
-	mainFile.WriteString(mainCode)
+	serverFile.WriteString(serverCode)
 }

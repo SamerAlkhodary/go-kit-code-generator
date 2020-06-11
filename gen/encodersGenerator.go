@@ -10,7 +10,7 @@ func encoderDecoderGenerator(s model.Service) string {
 	var code strings.Builder
 	code.Grow(1000)
 	fmt.Fprintf(&code, "package %s\n", s.GetServiceName())
-	fmt.Fprintf(&code, "import(\n%q\n %q\n%q\n%q)\n", "encoding/json", "context", "github.com/gorilla/mux", "net/http")
+	fmt.Fprintf(&code, "import(\n%q\n%q\n %q\n%q\n%q)\n", "encoding/json", "context", "github.com/gorilla/mux", "context", "net/http")
 	fmt.Fprintf(&code, "func encodeResponse(ctx context.Context, w http.ResponseWriter,response interface{})error{\n")
 	fmt.Fprintf(&code, "return json.NewEncoder(w).Encode(response)\n}")
 	for _, endpoint := range s.Endpoints {

@@ -11,9 +11,7 @@ func mainCodeGenerator(s model.Service) string {
 	code.Grow(1000)
 	fmt.Fprintf(&code, "package %s\n", s.GetServiceName())
 	fmt.Fprintf(&code, "import(\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n)\n", "github.com/go-kit/kit/log", "github.com/go-kit/kit/log/level", "fmt", "flag", "net/http", "os", "os/signal", "syscall", "context")
-	fmt.Fprintf(&code, "func main(){\nvar httpAddr= flag.String(%q,%q,%q)\nvar logger log.Logger\n{\n\n", "http", ":8080", "http listen address")
-
-	fmt.Fprintf(&code, "\nvar httpAddr= flag.String(%q,%q,%q)", "http", ":8080", "http listen address")
+	fmt.Fprintf(&code, "func Serve(){\nvar httpAddr= flag.String(%q,%q,%q)\nvar logger log.Logger\n{\n\n", "http", ":8080", "http listen address")
 	fmt.Fprintf(&code, "\nlogger= log.NewLogfmtLogger(os.Stderr)\nlogger=log.NewSyncLogger(logger)\nlogger= log.With(logger,\n%q,%q,\n%q, log.DefaultTimestampUTC,\n%q, log.DefaultCaller,\n)\n}", "service", s.GetServiceName(), "time", "caller")
 	fmt.Fprintf(&code, "\nlevel.Info(logger).Log(%q,%q)", "msg", "service started")
 	fmt.Fprintf(&code, "\ndefer level.Info(logger).Log(%q,%q)", "msg", "service ended")
@@ -24,6 +22,7 @@ func mainCodeGenerator(s model.Service) string {
 	fmt.Fprintf(&code, "\nendpoints:=MakeEndpoints(service)")
 	fmt.Fprintf(&code, "\ngo func(){\nfmt.Println(%q,*httpAddr)", "Listening on port")
 	fmt.Fprintf(&code, "\nhandler:=NewHTTPServer(ctx,endpoints)\n")
+	fmt.Fprintf(&code, "\nerrs <- http.ListenAndServe(*httpAddr, handler)")
 	fmt.Fprintf(&code, "\n}()")
 	fmt.Fprintf(&code, "\nlevel.Error(logger).Log(%q, <-errs)\n}", "exit")
 
