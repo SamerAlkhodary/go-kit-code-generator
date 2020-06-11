@@ -1,20 +1,29 @@
 name: chatService
 endpoints:
   -
-    name: SendMessage
-    args: senderId string , reciverId string, message string
-    output: message string
+    name: CreateUser
+    args: firstName string , lastName string, email string, profilePic string
+    output: id string
+    transport: 
+      method: POST
+      path: /user
   -
-    name: SendImage
-    args: senderId string , reciverId string, img []byte
-    output: message string
+    name: GetUser
+    args: id string 
+    output: firstName string, lastName string, email string, profilePic string
+    transport:
+      method: GET
+      path: /user/{id}
   -
-    name: SendLocation
-    args: senderId string, recieverId string, location string
+    name: UpdateUser
+    args: id string, profilePic string
     output: message string
-  -
-    name: SendAudio
-    args: senderId string , reciverId string, sound []byte
-    output: message string,ok bool
+    transport:
+      method: PUT
+      path: /user/update
+
+  
+
+
   
 

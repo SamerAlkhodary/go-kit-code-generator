@@ -1,10 +1,9 @@
 package main
 
 import (
+	"go-kit-code-generator/gen"
+	"go-kit-code-generator/parser"
 	"os"
-
-	"services/generator/gen"
-	"services/generator/parser"
 )
 
 func main() {

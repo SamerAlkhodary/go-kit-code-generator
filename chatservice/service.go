@@ -1,34 +1,29 @@
-package chatservice
+package chatService
 import("context"
  "github.com/go-kit/kit/log")
-type chatservice interface{
-SendMessage(senderId string , reciverId string, message string,ctx context.Context)(string,error)
-SendImage(senderId string , reciverId string, img []byte,ctx context.Context)(string,error)
-SendLocation(senderId string, recieverId string, location string,ctx context.Context)(string,error)
-SendAudio(senderId string , reciverId string, sound []byte,ctx context.Context)(string,bool,error)
+type ChatService interface{
+CreateUser(firstName string , lastName string, email string, profilePic string,ctx context.Context)(string,error)
+GetUser(id string,ctx context.Context)(string,string,string,string,error)
+UpdateUser(id string, profilePic string,ctx context.Context)(string,error)
 }
-type chatservice struct{
+type chatService struct{
 repository Repository
 logger log.Logger
 }
-func NewService(rep Repository,logger log.Logger)chatservice{
- return &chatservice{
+func NewService(rep Repository,logger log.Logger)chatService{
+ return &chatService{
  repository: rep,
  logger:logger,
 }}
-func(s *chatService)SendMessage(senderId string , reciverId string, message string,ctx context.Context)(string,error){
-Logger:= log.With(s.logger,"method",SendMessage)
+func(s *chatService)CreateUser(firstName string , lastName string, email string, profilePic string,ctx context.Context)(string,error){
+Logger:= log.With(s.logger,"method",CreateUser)
 //TODO: implement
 }
-func(s *chatService)SendImage(senderId string , reciverId string, img []byte,ctx context.Context)(string,error){
-Logger:= log.With(s.logger,"method",SendImage)
+func(s *chatService)GetUser(id string,ctx context.Context)(string,string,string,string,error){
+Logger:= log.With(s.logger,"method",GetUser)
 //TODO: implement
 }
-func(s *chatService)SendLocation(senderId string, recieverId string, location string,ctx context.Context)(string,error){
-Logger:= log.With(s.logger,"method",SendLocation)
-//TODO: implement
-}
-func(s *chatService)SendAudio(senderId string , reciverId string, sound []byte,ctx context.Context)(string,bool,error){
-Logger:= log.With(s.logger,"method",SendAudio)
+func(s *chatService)UpdateUser(id string, profilePic string,ctx context.Context)(string,error){
+Logger:= log.With(s.logger,"method",UpdateUser)
 //TODO: implement
 }

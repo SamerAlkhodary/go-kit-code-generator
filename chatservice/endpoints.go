@@ -1,85 +1,66 @@
-package chatservice
+package chatService
 import("github.com/go-kit/kit/endpoint")
-type SendMessageRequest struct{
-senderId string 
- reciverId string
- message string
+type CreateUserRequest struct{
+FirstName string `json:"firstName"`
+LastName string `json:"lastName"`
+Email string `json:"email"`
+ProfilePic string `json:"profilePic"`
 
 }
-type  SendMessageResponse struct{
-message string
+type  CreateUserResponse struct{
+Id string `json:"id"`
 
 }
- func makeSendMessageEndpoint(s Service)endpoint.Endpoint{
+ func makeCreateUserEndpoint(s ChatService)endpoint.Endpoint{
 return func(ctx context.Context, request interface{}) (interface{}, error) {
-req := request.(SendMessageRequest)
-message,error:=s.SendMessage(req.senderId,req.reciverId,req.message)
-return SendMessageResponse{message: message,}, error
+req := request.(CreateUserRequest)
+id,error:=s.CreateUser(req.FirstName,req.LastName,req.Email,req.ProfilePic)
+return CreateUserResponse{Id: id,}, error
 }
 }
-type SendImageRequest struct{
-senderId string 
- reciverId string
- img []byte
+type GetUserRequest struct{
+Id string `json:"id"`
 
 }
-type  SendImageResponse struct{
-message string
+type  GetUserResponse struct{
+FirstName string `json:"firstName"`
+LastName string `json:"lastName"`
+Email string `json:"email"`
+ProfilePic string `json:"profilePic"`
 
 }
- func makeSendImageEndpoint(s Service)endpoint.Endpoint{
+ func makeGetUserEndpoint(s ChatService)endpoint.Endpoint{
 return func(ctx context.Context, request interface{}) (interface{}, error) {
-req := request.(SendImageRequest)
-message,error:=s.SendImage(req.senderId,req.reciverId,req.img)
-return SendImageResponse{message: message,}, error
+req := request.(GetUserRequest)
+firstName,lastName,email,profilePic,error:=s.GetUser(req.Id)
+return GetUserResponse{FirstName: firstName,LastName: lastName,Email: email,ProfilePic: profilePic,}, error
 }
 }
-type SendLocationRequest struct{
-senderId string
- recieverId string
- location string
+type UpdateUserRequest struct{
+Id string `json:"id"`
+ProfilePic string `json:"profilePic"`
 
 }
-type  SendLocationResponse struct{
-message string
+type  UpdateUserResponse struct{
+Message string `json:"message"`
 
 }
- func makeSendLocationEndpoint(s Service)endpoint.Endpoint{
+ func makeUpdateUserEndpoint(s ChatService)endpoint.Endpoint{
 return func(ctx context.Context, request interface{}) (interface{}, error) {
-req := request.(SendLocationRequest)
-message,error:=s.SendLocation(req.senderId,req.recieverId,req.location)
-return SendLocationResponse{message: message,}, error
-}
-}
-type SendAudioRequest struct{
-senderId string 
- reciverId string
- sound []byte
-
-}
-type  SendAudioResponse struct{
-message string
-ok bool
-
-}
- func makeSendAudioEndpoint(s Service)endpoint.Endpoint{
-return func(ctx context.Context, request interface{}) (interface{}, error) {
-req := request.(SendAudioRequest)
-message,ok,error:=s.SendAudio(req.senderId,req.reciverId,req.sound)
-return SendAudioResponse{message: message,ok: ok,}, error
+req := request.(UpdateUserRequest)
+message,error:=s.UpdateUser(req.Id,req.ProfilePic)
+return UpdateUserResponse{Message: message,}, error
 }
 }
 type Endpoints struct{
- SendMessage endpoint.Endpoint
-SendImage endpoint.Endpoint
-SendLocation endpoint.Endpoint
-SendAudio endpoint.Endpoint
+ CreateUser endpoint.Endpoint
+GetUser endpoint.Endpoint
+UpdateUser endpoint.Endpoint
 }
 func MakeEndpoints(s chatService)Endpoints{
  return Endpoints{
-SendMessage:makeSendMessage(s),
-SendImage:makeSendImage(s),
-SendLocation:makeSendLocation(s),
-SendAudio:makeSendAudio(s),
+CreateUser:makeCreateUser(s),
+GetUser:makeGetUser(s),
+UpdateUser:makeUpdateUser(s),
 }
 }

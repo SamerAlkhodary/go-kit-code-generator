@@ -2,19 +2,17 @@ package parser
 
 import (
 	"fmt"
+	"go-kit-code-generator/model"
 	"io/ioutil"
 	"log"
 
 	"gopkg.in/yaml.v2"
-
-	"services/generator/model"
 )
 
 type Parser struct {
 }
 
 func (parser *Parser) Parse(path string) *model.Service {
-	//TODO: Parses the file and returns a service pointer
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
 		log.Printf("error while reading file: %v", err)
