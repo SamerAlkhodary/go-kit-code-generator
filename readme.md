@@ -11,7 +11,7 @@ The program needs dep to download all the packages needed in the code
 
 2. The yaml file should contain at least one endpoint inorder to generate the code
 3. The transport method and path should be provided for each and every endpoint in order to generate the code.
-
+4. Model is optional
 ## The generated files:
 1. Transport file that contains all the code needed inroder to have a rest api
 2. Encoders file that is needed to help the transport layer to decode and encode the informations
