@@ -21,3 +21,44 @@ The program needs dep to download all the packages needed in the code
    
 ## Future features: 
 The ability to choose whether a repository is needed. If so the repository will be generated  and connected to the service.
+
+## Example of a .yaml file:
+```yaml
+name: chatService
+endpoints:
+  -
+    name: CreateUser
+    args: firstName string , lastName string, email string, profilePic string
+    output: id string
+    transport: 
+      method: POST
+      path: /user
+  -
+    name: GetUser
+    args: id string 
+    output: firstName string, lastName string, email string, profilePic string
+    transport:
+      method: GET
+      path: /user/{id}
+  -
+    name: UpdateUser
+    args: id string, profilePic string
+    output: message string
+    transport:
+      method: PUT
+      path: /user/update
+model:
+  -
+    name: Person
+    attr: firstName string, lastName string , profilePic string , token string
+  -
+    name: Event
+    attr: name string, startDate string, endDate string, location Location
+  -
+    name: Location
+    attr: longitude float64, latitude float64
+    
+
+  
+
+```
