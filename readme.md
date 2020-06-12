@@ -8,7 +8,7 @@ The program needs dep to download all the packages needed in the code
 
 ## .yaml:
 1. The yaml file should contain the name of the service.
-2. The yaml file should contain at least one endpoint inroder to generate the code
+2. The yaml file should contain at least one endpoint in order to generate the code
 3. The transport method and path should be provided for each and every endpoint inorder to generate the code.
 
 ## The generated files:
