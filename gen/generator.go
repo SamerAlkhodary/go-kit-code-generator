@@ -33,6 +33,7 @@ func (gen *generator) GetParser() *parser.Parser {
 func (gen *generator) Generate() {
 	log.Println("Generating :", gen.inputPath)
 	service := gen.parser.Parse(gen.inputPath)
+	service.Apply()
 	err := service.CheckForError()
 	if err != nil {
 		log.Fatal(err)

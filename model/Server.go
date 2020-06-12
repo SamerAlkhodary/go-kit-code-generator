@@ -9,9 +9,10 @@ import (
 )
 
 type Service struct {
-	Name      string     `yaml:"name"`
-	Endpoints []Endpoint `yaml:"endpoints"`
-	Models    []Model    `yaml:"model"`
+	Name       string     `yaml:"name"`
+	Endpoints  []Endpoint `yaml:"endpoints"`
+	Models     []Model    `yaml:"model"`
+	Repository bool       `yaml:"repository"`
 }
 type Endpoint struct {
 	Name      string    `yaml:"name"`
@@ -100,12 +101,32 @@ func (s *Service) GetServiceName() string {
 
 }
 func (s *Service) CheckForError() error {
+	var err error
+	err = checkServiceError(s)
+	err = checkEndpointError(s)
+	err = checkModelError(s)
+
+	return err
+}
+
+func checkServiceError(s *Service) error {
 	if s.Name == "" {
 		return fmt.Errorf("Missing service name:%v", compileErr)
 	}
 	if len(s.Endpoints) == 0 {
 		return fmt.Errorf("Missing endpoints:%v", compileErr)
 	}
+
+	return nil
+
+}
+func (s *Service) Apply() {
+	for _, m := range s.Models {
+		goTypes[m.GetName(false)] = true
+	}
+}
+
+func checkEndpointError(s *Service) error {
 	for _, endpoint := range s.Endpoints {
 		if endpoint.GetName() == "" {
 			return fmt.Errorf("Missing endpoint name:%v", compileErr)
@@ -135,6 +156,30 @@ func (s *Service) CheckForError() error {
 		}
 
 	}
-
 	return nil
+
+}
+func checkModelError(s *Service) error {
+	if len(s.Models) == 0 {
+		return nil
+	}
+	for _, m := range s.Models {
+		if m.GetName(false) == "" {
+			return fmt.Errorf("Missing model name:%v", compileErr)
+
+		}
+		for _, attr := range m.GetModelAttributes() {
+			if len(strings.Split(strings.TrimSpace(attr), " ")) < 2 {
+				return fmt.Errorf("Mising type or variable name in %s endpoint  :%v", m.GetName(false), compileErr)
+
+			}
+			if goTypes[s.GetType(attr)] == false {
+				return fmt.Errorf("Unrecognised type %q in %s endpoint: %v", s.GetType(attr), m.GetName(false), compileErr)
+			}
+
+		}
+
+	}
+	return nil
+
 }

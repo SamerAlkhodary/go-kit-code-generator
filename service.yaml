@@ -21,6 +21,9 @@ endpoints:
     transport:
       method: PUT
       path: /user/update
+      
+repository: true
+
 model:
   -
     name: Person
