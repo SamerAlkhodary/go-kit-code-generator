@@ -16,28 +16,28 @@ func endpointsGenerator(s model.Service) string {
 
 		fmt.Fprintf(&code, "type %sRequest struct{\n", endpoint.GetName())
 		for _, arg := range endpoint.GetArgs() {
-			fmt.Fprintf(&code, "%s %s `json:%q`\n", endpoint.GetVariableName(arg, false), endpoint.GetType(arg), endpoint.GetVariableName(arg, true))
+			fmt.Fprintf(&code, "%s %s `json:%q`\n", s.GetVariableName(arg, false), s.GetType(arg), s.GetVariableName(arg, true))
 
 		}
 		fmt.Fprintf(&code, "%s\n}", "")
 		fmt.Fprintf(&code, "\ntype  %sResponse struct{\n", endpoint.GetName())
 		for _, out := range endpoint.GetOutputs() {
-			fmt.Fprintf(&code, "%s %s `json:%q`\n", endpoint.GetVariableName(out, false), endpoint.GetType(out), endpoint.GetVariableName(out, true))
+			fmt.Fprintf(&code, "%s %s `json:%q`\n", s.GetVariableName(out, false), s.GetType(out), s.GetVariableName(out, true))
 
 		}
 		fmt.Fprintf(&code, "\n}\n func make%sEndpoint(s %s)endpoint.Endpoint{\nreturn func(ctx context.Context, request interface{}) (interface{}, error) {\nreq := request.(%sRequest)\n", endpoint.GetName(), s.GetInterfaceName(), endpoint.GetName())
 		for _, out := range endpoint.GetOutputs() {
-			fmt.Fprintf(&code, "%s,", endpoint.GetVariableName(out, true))
+			fmt.Fprintf(&code, "%s,", s.GetVariableName(out, true))
 		}
 		fmt.Fprintf(&code, "error:=s.%s(", endpoint.GetName())
 
 		for _, arg := range endpoint.GetArgs() {
-			fmt.Fprintf(&code, "req.%s,", endpoint.GetVariableName(arg, false))
+			fmt.Fprintf(&code, "req.%s,", s.GetVariableName(arg, false))
 
 		}
 		fmt.Fprintf(&code, "ctx)\nreturn %sResponse{", endpoint.GetName())
 		for _, out := range endpoint.GetOutputs() {
-			fmt.Fprintf(&code, "%s: %s,", endpoint.GetVariableName(out, false), endpoint.GetVariableName(out, true))
+			fmt.Fprintf(&code, "%s: %s,", s.GetVariableName(out, false), s.GetVariableName(out, true))
 		}
 		fmt.Fprintf(&code, "}, error\n}\n}\n")
 	}

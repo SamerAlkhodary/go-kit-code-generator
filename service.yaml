@@ -21,6 +21,17 @@ endpoints:
     transport:
       method: PUT
       path: /user/update
+model:
+  -
+    name: Person
+    attr: firstName string, lastName string , profilePic string , token string
+  -
+    name: Event
+    attr: name string, startDate string, endDate string, location Location
+  -
+    name: Location
+    attr: longitude float64, latitude float64
+    
 
   
 

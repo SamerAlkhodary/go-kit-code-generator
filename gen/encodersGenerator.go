@@ -22,7 +22,7 @@ func encoderDecoderGenerator(s model.Service) string {
 			fmt.Fprintf(&code, "\nfunc decode%sRequest(ctx context.Context, r *http.Request)(interface{},error){\n", endpoint.GetName())
 			fmt.Fprintf(&code, "var request %sRequest\n vars:= mux.Vars(r)\n request= %sRequest{\n ", endpoint.GetName(), endpoint.GetName())
 			for _, arg := range endpoint.GetArgs() {
-				fmt.Fprintf(&code, "%s: vars[%q]", endpoint.GetVariableName(arg, false), endpoint.GetVariableName(arg, true))
+				fmt.Fprintf(&code, "%s: vars[%q]", s.GetVariableName(arg, false), s.GetVariableName(arg, true))
 			}
 			fmt.Fprintf(&code, "}\nreturn request,nil\n}\n")
 		}

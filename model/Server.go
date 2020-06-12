@@ -1,14 +1,17 @@
 package model
 
 import (
+	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/iancoleman/strcase"
 )
 
 type Service struct {
-	Name      string     `json:"name"`
+	Name      string     `yaml:"name"`
 	Endpoints []Endpoint `yaml:"endpoints"`
+	Models    []Model    `yaml:"model"`
 }
 type Endpoint struct {
 	Name      string    `yaml:"name"`
@@ -20,15 +23,42 @@ type Transport struct {
 	Method string `yaml:"method"`
 	Path   string `yaml:"path"`
 }
+type Model struct {
+	Name       string `yaml:"name"`
+	Attributes string `yaml:"attr"`
+}
+
+var goTypes = make(map[string]bool)
+
+func init() {
+	goTypes["string"] = true
+	goTypes["int"] = true
+	goTypes["float32"] = true
+	goTypes["float64"] = true
+	goTypes["byte"] = true
+	goTypes["uint"] = true
+	goTypes["uint8"] = true
+	goTypes["uint16"] = true
+	goTypes["uint32"] = true
+	goTypes["uint64"] = true
+	goTypes["int8"] = true
+	goTypes["int16"] = true
+	goTypes["int32"] = true
+	goTypes["int64"] = true
+	goTypes["bool"] = true
+
+}
+
+var compileErr = errors.New("Compiling error")
 
 func (endpoint *Endpoint) GetArgs() []string {
 
-	return strings.Split(endpoint.Args, ",")
+	return strings.Split(strings.TrimSpace(endpoint.Args), ",")
 }
 func (endpoint *Endpoint) GetOutputs() []string {
 	return strings.Split(endpoint.Output, ",")
 }
-func (endpoint *Endpoint) GetVariableName(in string, private bool) string {
+func (s *Service) GetVariableName(in string, private bool) string {
 	if private {
 		return strcase.ToLowerCamel(strings.Split(strings.TrimSpace(in), " ")[0])
 	} else {
@@ -36,7 +66,18 @@ func (endpoint *Endpoint) GetVariableName(in string, private bool) string {
 	}
 
 }
-func (endpoint *Endpoint) GetType(in string) string {
+func (m *Model) GetModelAttributes() []string {
+	return strings.Split(strings.TrimSpace(m.Attributes), ",")
+}
+func (m *Model) GetName(private bool) string {
+	if private {
+		return strcase.ToLowerCamel(strings.TrimSpace(m.Name))
+
+	}
+	return strcase.ToCamel(strings.TrimSpace(m.Name))
+
+}
+func (s *Service) GetType(in string) string {
 	return strings.Split(strings.TrimSpace(in), " ")[1]
 
 }
@@ -57,4 +98,43 @@ func (s *Service) GetInterfaceName() string {
 func (s *Service) GetServiceName() string {
 	return strcase.ToLowerCamel(s.Name)
 
+}
+func (s *Service) CheckForError() error {
+	if s.Name == "" {
+		return fmt.Errorf("Missing service name:%v", compileErr)
+	}
+	if len(s.Endpoints) == 0 {
+		return fmt.Errorf("Missing endpoints:%v", compileErr)
+	}
+	for _, endpoint := range s.Endpoints {
+		if endpoint.GetName() == "" {
+			return fmt.Errorf("Missing endpoint name:%v", compileErr)
+
+		}
+		for _, arg := range endpoint.GetArgs() {
+			if len(strings.Split(strings.TrimSpace(arg), " ")) < 2 {
+				return fmt.Errorf("Mising type or variable name in %s endpoint  :%v", endpoint.GetName(), compileErr)
+
+			}
+			if goTypes[s.GetType(arg)] == false {
+				return fmt.Errorf("Unrecognised type %q in %s endpoint: %v", s.GetType(arg), endpoint.GetName(), compileErr)
+			}
+			if endpoint.GetTransport()["path"] == "" || endpoint.GetTransport()["method"] == "" {
+				return fmt.Errorf("Missing transport info in %s endpoint: %v", endpoint.GetName(), compileErr)
+			}
+		}
+		for _, out := range endpoint.GetOutputs() {
+			if len(strings.Split(strings.TrimSpace(out), " ")) < 2 {
+				return fmt.Errorf("Mising type or variable name in %s endpoint  :%v", endpoint.GetName(), compileErr)
+
+			}
+			if goTypes[s.GetType(out)] == false {
+				return fmt.Errorf("Unrecognised type %q in %s endpoint: %v", s.GetType(out), endpoint.GetName(), compileErr)
+			}
+
+		}
+
+	}
+
+	return nil
 }

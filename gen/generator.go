@@ -33,16 +33,23 @@ func (gen *generator) GetParser() *parser.Parser {
 func (gen *generator) Generate() {
 	log.Println("Generating :", gen.inputPath)
 	service := gen.parser.Parse(gen.inputPath)
+	err := service.CheckForError()
+	if err != nil {
+		log.Fatal(err)
+	}
 	endCode := endpointsGenerator(*service)
 	serviceCode := serviceGenerator(*service)
 	transportCode := transportGenerator(*service)
 	encodersCode := encoderDecoderGenerator(*service)
+	modelCode := modelGenerator(*service)
 	serverCode := mainCodeGenerator(*service)
 	endpath := fmt.Sprintf("%s/endpoints.go", gen.outputPath)
 	servicepath := fmt.Sprintf("%s/service.go", gen.outputPath)
 	transportPath := fmt.Sprintf("%s/transport.go", gen.outputPath)
 	encodersPath := fmt.Sprintf("%s/encoders.go", gen.outputPath)
 	serverPath := fmt.Sprintf("%s/server.go", gen.outputPath)
+	modelPath := fmt.Sprintf("%s/model.go", gen.outputPath)
+	modelFile, err := os.Create(modelPath)
 	serverFile, err := os.Create(serverPath)
 	encodersFile, err := os.Create(encodersPath)
 	endFile, err := os.Create(endpath)
@@ -54,6 +61,7 @@ func (gen *generator) Generate() {
 	}
 	defer serverFile.Close()
 	defer transportFile.Close()
+	defer modelFile.Close()
 	defer serviceFile.Close()
 	defer encodersFile.Close()
 	defer endFile.Close()
@@ -62,4 +70,6 @@ func (gen *generator) Generate() {
 	serviceFile.WriteString(serviceCode)
 	encodersFile.WriteString(encodersCode)
 	serverFile.WriteString(serverCode)
+	modelFile.WriteString(modelCode)
+	fmt.Println("Generating acomplished")
 }

@@ -1,7 +1,6 @@
 package parser
 
 import (
-	"fmt"
 	"go-kit-code-generator/model"
 	"io/ioutil"
 	"log"
@@ -20,8 +19,7 @@ func (parser *Parser) Parse(path string) *model.Service {
 	}
 	service := model.Service{}
 	yaml.Unmarshal([]byte(file), &service)
-	fmt.Println(service.Name)
-	fmt.Println(service.Endpoints)
+
 	return &service
 
 }

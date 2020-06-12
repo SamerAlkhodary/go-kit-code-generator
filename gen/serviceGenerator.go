@@ -20,7 +20,7 @@ func serviceGenerator(s model.Service) string {
 		}
 		fmt.Fprintf(&code, "%s", "ctx context.Context)(")
 		for _, out := range endpoint.GetOutputs() {
-			fmt.Fprintf(&code, "%s,", endpoint.GetType(out))
+			fmt.Fprintf(&code, "%s,", s.GetType(out))
 		}
 		fmt.Fprintf(&code, "error)\n")
 
@@ -39,8 +39,7 @@ func serviceGenerator(s model.Service) string {
 		}
 		fmt.Fprintf(&code, "%s", "ctx context.Context)(")
 		for _, out := range endpoint.GetOutputs() {
-			fmt.Println(strings.Split(out, " ")[1])
-			fmt.Fprintf(&code, "%s,", endpoint.GetType(out))
+			fmt.Fprintf(&code, "%s,", s.GetType(out))
 		}
 		fmt.Fprintf(&code, "error){\n")
 		fmt.Fprintf(&code, "Logger:= log.With(s.logger,%q,%q)\n//TODO: implement\n", "method", endpoint.GetName())
