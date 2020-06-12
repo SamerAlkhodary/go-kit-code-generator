@@ -58,8 +58,5 @@ model:
   -
     name: Location
     attr: longitude float64, latitude float64
-    
-
-  
 
 ```
