@@ -50,7 +50,8 @@ func (gen *generator) Generate() {
 	modelCode := modelGenerator(*service)
 	serverCode := mainCodeGenerator(*service)
 	repoCode := repositroyGenerator(*service)
-	wg.Add(7)
+	cacheCode := cacheGenerator(*service)
+	wg.Add(8)
 	go genCode(service, gen, "endpoints", endCode, &wg)
 	go genCode(service, gen, "transport", transportCode, &wg)
 	go genCode(service, gen, "encoders", encodersCode, &wg)
@@ -58,6 +59,7 @@ func (gen *generator) Generate() {
 	go genCode(service, gen, "server", serverCode, &wg)
 	go genCode(service, gen, "service", serviceCode, &wg)
 	go genCode(service, gen, "repository", repoCode, &wg)
+	go genCode(service, gen, "cache", cacheCode, &wg)
 	wg.Wait()
 
 	fmt.Println("Generating acomplished")
@@ -66,6 +68,11 @@ func genCode(s *model.Service, gen *generator, name string, code string, wg *syn
 	defer wg.Done()
 	if name == "repository" {
 		if !s.Repository.Value {
+			return
+		}
+	}
+	if name == "cache" {
+		if s.RedisCache.GetHost() == "" {
 			return
 		}
 	}
