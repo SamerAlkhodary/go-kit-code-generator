@@ -65,8 +65,7 @@ func (gen *generator) Generate() {
 func genCode(s *model.Service, gen *generator, name string, code string, wg *sync.WaitGroup) {
 	defer wg.Done()
 	if name == "repository" {
-		fmt.Println(s.Repository)
-		if !s.Repository {
+		if !s.Repository.Value {
 			return
 		}
 	}

@@ -28,7 +28,7 @@ func serviceGenerator(s model.Service) string {
 	fmt.Fprintf(&code, "%s\n", "}")
 
 	fmt.Fprintf(&code, "type %s struct{\n", s.GetServiceName())
-	if s.Repository {
+	if s.Repository.Value {
 		fmt.Fprintf(&code, "%s\n", "logger log.Logger\n repository Repository")
 
 	} else {
@@ -37,7 +37,7 @@ func serviceGenerator(s model.Service) string {
 	}
 
 	fmt.Fprintf(&code, "%s\n", "}")
-	if s.Repository {
+	if s.Repository.Value {
 
 		fmt.Fprintf(&code, "func NewService(logger log.Logger,repository Repository)%s{\n return &%s{\n logger:logger,\n repository:repository,\n}}\n", s.GetInterfaceName(), s.GetServiceName())
 	} else {
@@ -55,7 +55,7 @@ func serviceGenerator(s model.Service) string {
 			fmt.Fprintf(&code, "%s,", s.GetType(out))
 		}
 		fmt.Fprintf(&code, "error){\n")
-		if s.Repository {
+		if s.Repository.Value {
 			for _, out := range endpoint.GetOutputs() {
 				fmt.Fprintf(&code, "logger:= log.With(s.logger,%q,%q)\n", "method", endpoint.GetName())
 				fmt.Fprintf(&code, "%s,", s.GetVariableName(out, true))
@@ -68,9 +68,11 @@ func serviceGenerator(s model.Service) string {
 			fmt.Fprintf(&code, "ctx)\n")
 			fmt.Fprintf(&code, "\nif err!=nil{")
 			fmt.Fprintf(&code, "\nlevel.Error(logger).Log(%q,err)\n", "err")
+			fmt.Fprintf(&code, "\n//TODO: fix return")
 			fmt.Fprintf(&code, "\nreturn nil,err \n")
 			fmt.Fprintf(&code, "\n}\n")
 			fmt.Fprintf(&code, "\nlogger.Log(%q)\n", endpoint.GetName())
+
 			fmt.Fprintf(&code, "\nreturn ")
 			for _, out := range endpoint.GetOutputs() {
 				fmt.Fprintf(&code, "%s,", s.GetVariableName(out, true))

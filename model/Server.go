@@ -12,7 +12,15 @@ type Service struct {
 	Name       string     `yaml:"name"`
 	Endpoints  []Endpoint `yaml:"endpoints"`
 	Models     []Model    `yaml:"model"`
-	Repository bool       `yaml:"repository"`
+	Repository Repository `yaml:"repository"`
+}
+type Repository struct {
+	Value bool `yaml:"value"`
+	DB    DB   `yaml:"db"`
+}
+type DB struct {
+	Name    string `yaml:"name"`
+	Address string `yaml:"address"`
 }
 type Endpoint struct {
 	Name      string    `yaml:"name"`
@@ -48,6 +56,15 @@ func init() {
 	goTypes["int64"] = true
 	goTypes["bool"] = true
 
+}
+func (r *Repository) GetDB() DB {
+	return r.DB
+}
+func (d DB) GetName() string {
+	return strings.ToLower(d.Name)
+}
+func (d DB) GetAddress() string {
+	return d.Address
 }
 
 var compileErr = errors.New("Compiling error")

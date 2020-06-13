@@ -22,16 +22,13 @@ endpoints:
       method: PUT
       path: /user/update
       
-repository: true
-
+repository:
+  value: true
+  db:
+    name: mysql
+    address: address
 
 model:
   -
     name: User
     attr: firstName string, lastName string , profilePic string , token string
-
-  
-
-
-  
-
