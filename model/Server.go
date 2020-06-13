@@ -12,7 +12,15 @@ type Service struct {
 	Name       string     `yaml:"name"`
 	Endpoints  []Endpoint `yaml:"endpoints"`
 	Models     []Model    `yaml:"model"`
-	Repository bool       `yaml:"repository"`
+	Repository Repository `yaml:"repository"`
+}
+type Repository struct {
+	Value bool `yaml:"value"`
+	DB    DB   `yaml:"db"`
+}
+type DB struct {
+	Name    string `yaml:"name"`
+	Address string `yaml:"address"`
 }
 type Endpoint struct {
 	Name      string    `yaml:"name"`
@@ -48,6 +56,15 @@ func init() {
 	goTypes["int64"] = true
 	goTypes["bool"] = true
 
+}
+func (r *Repository) GetDB() DB {
+	return r.DB
+}
+func (d DB) GetName() string {
+	return strings.ToLower(d.Name)
+}
+func (d DB) GetAddress() string {
+	return d.Address
 }
 
 var compileErr = errors.New("Compiling error")
@@ -103,8 +120,17 @@ func (s *Service) GetServiceName() string {
 func (s *Service) CheckForError() error {
 	var err error
 	err = checkServiceError(s)
+	if err != nil {
+		return err
+	}
 	err = checkEndpointError(s)
+	if err != nil {
+		return err
+	}
 	err = checkModelError(s)
+	if err != nil {
+		return err
+	}
 
 	return err
 }
@@ -137,7 +163,8 @@ func checkEndpointError(s *Service) error {
 				return fmt.Errorf("Mising type or variable name in %s endpoint  :%v", endpoint.GetName(), compileErr)
 
 			}
-			if goTypes[s.GetType(arg)] == false {
+			if !goTypes[s.GetType(arg)] {
+
 				return fmt.Errorf("Unrecognised type %q in %s endpoint: %v", s.GetType(arg), endpoint.GetName(), compileErr)
 			}
 			if endpoint.GetTransport()["path"] == "" || endpoint.GetTransport()["method"] == "" {
@@ -149,7 +176,7 @@ func checkEndpointError(s *Service) error {
 				return fmt.Errorf("Mising type or variable name in %s endpoint  :%v", endpoint.GetName(), compileErr)
 
 			}
-			if goTypes[s.GetType(out)] == false {
+			if !goTypes[s.GetType(out)] {
 				return fmt.Errorf("Unrecognised type %q in %s endpoint: %v", s.GetType(out), endpoint.GetName(), compileErr)
 			}
 

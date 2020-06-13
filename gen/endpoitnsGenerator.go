@@ -10,7 +10,7 @@ func endpointsGenerator(s model.Service) string {
 	var code strings.Builder
 	code.Grow(1000)
 	fmt.Fprintf(&code, "package %s\n", s.GetServiceName())
-	fmt.Fprintf(&code, "import(%q)\n", "github.com/go-kit/kit/endpoint")
+	fmt.Fprintf(&code, "import(\n%q\n%q\n)\n", "github.com/go-kit/kit/endpoint", "context")
 
 	for _, endpoint := range s.Endpoints {
 
