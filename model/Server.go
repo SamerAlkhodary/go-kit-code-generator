@@ -103,8 +103,17 @@ func (s *Service) GetServiceName() string {
 func (s *Service) CheckForError() error {
 	var err error
 	err = checkServiceError(s)
+	if err != nil {
+		return err
+	}
 	err = checkEndpointError(s)
+	if err != nil {
+		return err
+	}
 	err = checkModelError(s)
+	if err != nil {
+		return err
+	}
 
 	return err
 }
@@ -137,7 +146,8 @@ func checkEndpointError(s *Service) error {
 				return fmt.Errorf("Mising type or variable name in %s endpoint  :%v", endpoint.GetName(), compileErr)
 
 			}
-			if goTypes[s.GetType(arg)] == false {
+			if !goTypes[s.GetType(arg)] {
+
 				return fmt.Errorf("Unrecognised type %q in %s endpoint: %v", s.GetType(arg), endpoint.GetName(), compileErr)
 			}
 			if endpoint.GetTransport()["path"] == "" || endpoint.GetTransport()["method"] == "" {
@@ -149,7 +159,7 @@ func checkEndpointError(s *Service) error {
 				return fmt.Errorf("Mising type or variable name in %s endpoint  :%v", endpoint.GetName(), compileErr)
 
 			}
-			if goTypes[s.GetType(out)] == false {
+			if !goTypes[s.GetType(out)] {
 				return fmt.Errorf("Unrecognised type %q in %s endpoint: %v", s.GetType(out), endpoint.GetName(), compileErr)
 			}
 

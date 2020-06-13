@@ -2,7 +2,7 @@ name: chatService
 endpoints:
   -
     name: CreateUser
-    args: firstName string , lastName string, email string, profilePic string
+    args: user User
     output: id string
     transport: 
       method: POST
@@ -10,7 +10,7 @@ endpoints:
   -
     name: GetUser
     args: id string 
-    output: firstName string, lastName string, email string, profilePic string
+    output: user User
     transport:
       method: GET
       path: /user/{id}
@@ -24,17 +24,11 @@ endpoints:
       
 repository: true
 
+
 model:
   -
-    name: Person
+    name: User
     attr: firstName string, lastName string , profilePic string , token string
-  -
-    name: Event
-    attr: name string, startDate string, endDate string, location Location
-  -
-    name: Location
-    attr: longitude float64, latitude float64
-    
 
   
 

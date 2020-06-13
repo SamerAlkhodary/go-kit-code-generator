@@ -2,9 +2,11 @@ package gen
 
 import (
 	"fmt"
+	"go-kit-code-generator/model"
 	"go-kit-code-generator/parser"
 	"log"
 	"os"
+	"sync"
 )
 
 type generator struct {
@@ -30,11 +32,14 @@ func (gen *generator) GetOutputPath() string {
 func (gen *generator) GetParser() *parser.Parser {
 	return &gen.parser
 }
+
 func (gen *generator) Generate() {
+	var wg sync.WaitGroup
 	log.Println("Generating :", gen.inputPath)
 	service := gen.parser.Parse(gen.inputPath)
 	service.Apply()
 	err := service.CheckForError()
+	fmt.Println(err)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -44,33 +49,35 @@ func (gen *generator) Generate() {
 	encodersCode := encoderDecoderGenerator(*service)
 	modelCode := modelGenerator(*service)
 	serverCode := mainCodeGenerator(*service)
-	endpath := fmt.Sprintf("%s/endpoints.go", gen.outputPath)
-	servicepath := fmt.Sprintf("%s/service.go", gen.outputPath)
-	transportPath := fmt.Sprintf("%s/transport.go", gen.outputPath)
-	encodersPath := fmt.Sprintf("%s/encoders.go", gen.outputPath)
-	serverPath := fmt.Sprintf("%s/server.go", gen.outputPath)
-	modelPath := fmt.Sprintf("%s/model.go", gen.outputPath)
-	modelFile, err := os.Create(modelPath)
-	serverFile, err := os.Create(serverPath)
-	encodersFile, err := os.Create(encodersPath)
-	endFile, err := os.Create(endpath)
-	serviceFile, err := os.Create(servicepath)
-	transportFile, err := os.Create(transportPath)
+	repoCode := repositroyGenerator(*service)
+	wg.Add(7)
+	go genCode(service, gen, "endpoints", endCode, &wg)
+	go genCode(service, gen, "transport", transportCode, &wg)
+	go genCode(service, gen, "encoders", encodersCode, &wg)
+	go genCode(service, gen, "model", modelCode, &wg)
+	go genCode(service, gen, "server", serverCode, &wg)
+	go genCode(service, gen, "service", serviceCode, &wg)
+	go genCode(service, gen, "repository", repoCode, &wg)
+	wg.Wait()
 
+	fmt.Println("Generating acomplished")
+}
+func genCode(s *model.Service, gen *generator, name string, code string, wg *sync.WaitGroup) {
+	defer wg.Done()
+	if name == "repository" {
+		fmt.Println(s.Repository)
+		if !s.Repository {
+			return
+		}
+	}
+
+	path := fmt.Sprintf("%s/%s.go", gen.outputPath, name)
+	file, err := os.Create(path)
 	if err != nil {
 		log.Printf("error while creating file:%v", err)
 	}
-	defer serverFile.Close()
-	defer transportFile.Close()
-	defer modelFile.Close()
-	defer serviceFile.Close()
-	defer encodersFile.Close()
-	defer endFile.Close()
-	transportFile.WriteString(transportCode)
-	endFile.WriteString(endCode)
-	serviceFile.WriteString(serviceCode)
-	encodersFile.WriteString(encodersCode)
-	serverFile.WriteString(serverCode)
-	modelFile.WriteString(modelCode)
-	fmt.Println("Generating acomplished")
+
+	file.WriteString(code)
+	defer file.Close()
+
 }
