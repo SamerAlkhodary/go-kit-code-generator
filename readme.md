@@ -24,7 +24,8 @@ The program needs dep to download all the packages needed in the code
 4. Server file that contains the Serve function that need to be called to run the program
 5. model file that contains everything specifed in the model section of the yaml file ( it has setters and getters)
 6. Endpoint file that contains all the endpoints specified in the yaml file
-7. Repository can be generated and connected to a database
+7. Repository can be generated and connected to a database.
+8. The supported databases are mysql and postgress
 
 ## Future features:
 
@@ -37,7 +38,7 @@ name: chatService
 endpoints:
   -
     name: CreateUser
-    args: firstName string , lastName string, email string, profilePic string
+    args: user User
     output: id string
     transport: 
       method: POST
@@ -45,7 +46,7 @@ endpoints:
   -
     name: GetUser
     args: id string 
-    output: firstName string, lastName string, email string, profilePic string
+    output: user User
     transport:
       method: GET
       path: /user/{id}
@@ -56,15 +57,15 @@ endpoints:
     transport:
       method: PUT
       path: /user/update
+
+repository:
+  value: true
+  db:
+    name: mysql
+    address: address
+
 model:
   -
-    name: Person
+    name: User
     attr: firstName string, lastName string , profilePic string , token string
-  -
-    name: Event
-    attr: name string, startDate string, endDate string, location Location
-  -
-    name: Location
-    attr: longitude float64, latitude float64
-
 ```
