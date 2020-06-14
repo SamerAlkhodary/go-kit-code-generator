@@ -1,6 +1,7 @@
 name: userService
 redis_cache:
   host: host
+  password: password
 
 endpoints:
   -

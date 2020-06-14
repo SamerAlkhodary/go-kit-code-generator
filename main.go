@@ -1,9 +1,10 @@
 package main
 
 import (
-	"go-kit-code-generator/gen"
-	"go-kit-code-generator/parser"
 	"os"
+
+	"github.com/samkhud/go-kit-code-generator/gen"
+	"github.com/samkhud/go-kit-code-generator/parser"
 )
 
 func main() {

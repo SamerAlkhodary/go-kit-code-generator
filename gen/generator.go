@@ -2,11 +2,14 @@ package gen
 
 import (
 	"fmt"
-	"go-kit-code-generator/model"
-	"go-kit-code-generator/parser"
+
+	"github.com/samkhud/go-kit-code-generator/model"
+
 	"log"
 	"os"
 	"sync"
+
+	"github.com/samkhud/go-kit-code-generator/parser"
 )
 
 type generator struct {

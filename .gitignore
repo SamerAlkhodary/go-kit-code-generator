@@ -2,3 +2,5 @@ vendor/
 *.lock
 *.toml
 go-gen
+*.sum
+*.mod

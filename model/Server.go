@@ -16,7 +16,8 @@ type Service struct {
 	RedisCache Cache      `yaml:"redis_cache"`
 }
 type Cache struct {
-	Host string
+	Host     string `yaml:"host"`
+	Password string `yaml:"passsword"`
 }
 type Repository struct {
 	Value bool `yaml:"value"`

@@ -2,8 +2,9 @@ package gen
 
 import (
 	"fmt"
-	"go-kit-code-generator/model"
 	"strings"
+
+	"github.com/samkhud/go-kit-code-generator/model"
 )
 
 func endpointsGenerator(s model.Service) string {

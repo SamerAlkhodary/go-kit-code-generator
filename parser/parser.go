@@ -1,10 +1,10 @@
 package parser
 
 import (
-	"go-kit-code-generator/model"
 	"io/ioutil"
 	"log"
 
+	"github.com/samkhud/go-kit-code-generator/model"
 	"gopkg.in/yaml.v2"
 )
 
