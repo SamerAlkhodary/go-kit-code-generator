@@ -58,13 +58,6 @@ endpoints:
       method: GET
       path: /user/{id}
   -
-    name: UpdateUser
-    args: id string, profilePic string
-    output: message string
-    transport:
-      method: PUT
-      path: /user/update
-  -
     name: GetAllUsers
     args:
     output: users []User
