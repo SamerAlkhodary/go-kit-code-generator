@@ -31,19 +31,40 @@ func serviceGenerator(s model.Service) string {
 
 	fmt.Fprintf(&code, "type %s struct{\n", s.GetServiceName())
 	if s.Repository.Value {
-		fmt.Fprintf(&code, "%s\n", "logger log.Logger\n repository Repository")
+		if s.RedisCache.GetHost() != "" {
+			fmt.Fprintf(&code, "%s\n", "logger log.Logger\n repository Repository\ncache Cache")
+
+		} else {
+			fmt.Fprintf(&code, "%s\n", "logger log.Logger\n repository Repository")
+
+		}
 
 	} else {
-		fmt.Fprintf(&code, "%s\n", "logger log.Logger\n")
+		if s.RedisCache.GetHost() != "" {
+			fmt.Fprintf(&code, "%s\n", "logger log.Logger\ncache Cache")
+
+		} else {
+			fmt.Fprintf(&code, "%s\n", "logger log.Logger\n")
+
+		}
 
 	}
 
 	fmt.Fprintf(&code, "%s\n", "}")
 	if s.Repository.Value {
+		if s.RedisCache.GetHost() != "" {
+			fmt.Fprintf(&code, "func NewService(logger log.Logger,repository Repository,cache Cache)%s{\n return &%s{\n logger:logger,\n repository:repository,\ncache:cache,\n}}\n", s.GetInterfaceName(), s.GetServiceName())
 
-		fmt.Fprintf(&code, "func NewService(logger log.Logger,repository Repository)%s{\n return &%s{\n logger:logger,\n repository:repository,\n}}\n", s.GetInterfaceName(), s.GetServiceName())
+		} else {
+			fmt.Fprintf(&code, "func NewService(logger log.Logger,repository Repository)%s{\n return &%s{\n logger:logger,\n repository:repository,\n}}\n", s.GetInterfaceName(), s.GetServiceName())
+		}
+
 	} else {
-		fmt.Fprintf(&code, "func NewService(logger log.Logger)%s{\n return &%s{\n logger:logger,\n}}\n", s.GetInterfaceName(), s.GetServiceName())
+		if s.RedisCache.GetHost() != "" {
+			fmt.Fprintf(&code, "func NewService(logger log.Logger)%s{\n return &%s{\n logger:logger,\ncache:cache,\n}}\n", s.GetInterfaceName(), s.GetServiceName())
+		} else {
+			fmt.Fprintf(&code, "func NewService(logger log.Logger)%s{\n return &%s{\n logger:logger,\n}}\n", s.GetInterfaceName(), s.GetServiceName())
+		}
 
 	}
 

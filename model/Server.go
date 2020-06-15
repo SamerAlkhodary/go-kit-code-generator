@@ -17,7 +17,8 @@ type Service struct {
 }
 type Cache struct {
 	Host     string `yaml:"host"`
-	Password string `yaml:"passsword"`
+	Password string `yaml:"password"`
+	Db       int    `yaml:"db"`
 }
 type Repository struct {
 	Value bool `yaml:"value"`

@@ -2,13 +2,13 @@ name: userService
 redis_cache:
   host: host
   password: password
+  db: 0
 
 endpoints:
   -
     name: CreateUser
     args: user User
     output: id string
-    cache_time: 0
     transport: 
       method: POST
       path: /user
@@ -16,7 +16,7 @@ endpoints:
     name: GetUser
     args: id string
     output: user User
-    cache_time: 0
+    cache_time: 10000
     transport:
       method: GET
       path: /user/{id}
@@ -24,7 +24,6 @@ endpoints:
     name: UpdateUser
     args: id string, profilePic string
     output: message string
-    cache_time: 0
     transport:
       method: PUT
       path: /user/update

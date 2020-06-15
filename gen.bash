@@ -5,7 +5,7 @@ mkdir $serviceName
 echo Enter yaml file name:
 read yamlFile
 ./go-gen $yamlFile $serviceName
-echo dep init 
+echo mod init
 cd $serviceName
 go mod init github.com/$serviceName
 cd ..
