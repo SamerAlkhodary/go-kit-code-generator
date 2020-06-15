@@ -26,8 +26,12 @@ func endpointsGenerator(s model.Service) string {
 			fmt.Fprintf(&code, "%s %s `json:%q`\n", s.GetVariableName(out, false), s.GetType(out), s.GetVariableName(out, true))
 
 		}
-		fmt.Fprintf(&code, "\n}\n func make%sEndpoint(s %s)endpoint.Endpoint{\nreturn func(ctx context.Context, request interface{}) (interface{}, error) {\nreq := request.(%sRequest)\n", endpoint.GetName(), s.GetInterfaceName(), endpoint.GetName())
+		fmt.Fprintf(&code, "\n}\n func make%sEndpoint(s %s)endpoint.Endpoint{\nreturn func(ctx context.Context, request interface{}) (interface{}, error) {\n", endpoint.GetName(), s.GetInterfaceName())
+		if endpoint.GetTransport()["method"] != "GET" {
+			fmt.Fprintf(&code, "req := request.(%sRequest)\n", endpoint.GetName())
+		}
 		if endpoint.GetTransport()["method"] == "GET" && s.RedisCache.Host != "" {
+			fmt.Fprintf(&code, "req := request.(%sRequest)\n", endpoint.GetName())
 
 			fmt.Fprintf(&code, "\nresp,error:=s.GetCache().Get(ctx,req.Hashcode())")
 			fmt.Fprintf(&code, "\nif error!=nil{\n")
@@ -46,10 +50,10 @@ func endpointsGenerator(s model.Service) string {
 				fmt.Fprintf(&code, "%s: %s,", s.GetVariableName(out, false), s.GetVariableName(out, true))
 			}
 			fmt.Fprintf(&code, "}")
-			fmt.Fprintf(&code, "\ns.GetCache().Set(req.Hashcode(),response)")
+			fmt.Fprintf(&code, "\ns.GetCache().Set(ctx,req.Hashcode(),response,%d)", endpoint.GetCacheTime())
 			fmt.Fprintf(&code, "\nreturn response, error\n}")
 			fmt.Fprintf(&code, "\nvar response %sResponse", endpoint.GetName())
-			fmt.Fprintf(&code, "\n json.Unmarshal(resp,&response)")
+			fmt.Fprintf(&code, "\n json.Unmarshal([]byte(resp),&response)")
 			fmt.Fprintf(&code, "\nreturn response,nil")
 			fmt.Fprintf(&code, "}}")
 

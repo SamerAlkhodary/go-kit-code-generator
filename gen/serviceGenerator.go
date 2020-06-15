@@ -16,7 +16,7 @@ func serviceGenerator(s model.Service) string {
 
 	fmt.Fprintf(&code, "type %s interface{\n", s.GetInterfaceName())
 	for _, endpoint := range s.Endpoints {
-		fmt.Fprintf(&code, "%s(", endpoint.GetName())
+		fmt.Fprintf(&code, "\n%s(", endpoint.GetName())
 		for _, arg := range endpoint.GetArgs() {
 			fmt.Fprintf(&code, "%s,", arg)
 		}
@@ -24,9 +24,14 @@ func serviceGenerator(s model.Service) string {
 		for _, out := range endpoint.GetOutputs() {
 			fmt.Fprintf(&code, "%s,", s.GetType(out))
 		}
-		fmt.Fprintf(&code, "error)\n")
+		fmt.Fprintf(&code, "error)")
 
 	}
+	if s.RedisCache.GetHost() != "" {
+		fmt.Fprintf(&code, "\nGetCache()Cache")
+
+	}
+
 	fmt.Fprintf(&code, "%s\n", "}")
 
 	fmt.Fprintf(&code, "type %s struct{\n", s.GetServiceName())
@@ -69,7 +74,7 @@ func serviceGenerator(s model.Service) string {
 	}
 
 	for _, endpoint := range s.Endpoints {
-		fmt.Fprintf(&code, "func(s *%s)%s(", s.GetServiceName(), endpoint.GetName())
+		fmt.Fprintf(&code, "\nfunc(s *%s)%s(", s.GetServiceName(), endpoint.GetName())
 		for _, arg := range endpoint.GetArgs() {
 			fmt.Fprintf(&code, "%s,", arg)
 		}
@@ -107,8 +112,14 @@ func serviceGenerator(s model.Service) string {
 
 		}
 
-		fmt.Fprintf(&code, "}\n")
+		fmt.Fprintf(&code, "}")
+
+	}
+	if s.RedisCache.Host != "" {
+		fmt.Fprintf(&code, "\nfunc(s *%s)GetCache()Cache{\n", s.GetServiceName())
+		fmt.Fprintf(&code, "\nreturn s.cache\n}")
 
 	}
 	return code.String()
+
 }
