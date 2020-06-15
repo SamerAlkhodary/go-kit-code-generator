@@ -5,11 +5,11 @@
 The program needs dep to download all the packages needed in the code
 
 ## How to use:
-1.Compile the code using this command
+1. Compile the code using this command
 ```
 go build -o go-gen
 ```
-2.Run the shell code
+2. Run the shell code
 ```
 ./gen.bash
 
