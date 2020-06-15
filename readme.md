@@ -5,9 +5,8 @@
 The program needs dep to download all the packages needed in the code
 
 ## How to use:
-
-1. Fill a (serviceName).yaml file
-2. run gen.sh script and follow instructions
+$$go build -o go-gen
+$$./gen.bash
 
 ## .yaml:
 
