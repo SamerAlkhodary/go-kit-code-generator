@@ -5,9 +5,10 @@
 The program needs dep to download all the packages needed in the code
 
 ## How to use:
-$$go build -o go-gen
+```
+go build -o go-gen
 $$./gen.bash
-
+```
 ## .yaml:
 
 1. The yaml file should contain the name of the service.
