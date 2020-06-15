@@ -2,11 +2,15 @@ package gen
 
 import (
 	"fmt"
-	"go-kit-code-generator/model"
-	"go-kit-code-generator/parser"
+	"time"
+
+	"github.com/samkhud/go-kit-code-generator/model"
+
 	"log"
 	"os"
 	"sync"
+
+	"github.com/samkhud/go-kit-code-generator/parser"
 )
 
 type generator struct {
@@ -35,6 +39,7 @@ func (gen *generator) GetParser() *parser.Parser {
 
 func (gen *generator) Generate() {
 	var wg sync.WaitGroup
+
 	log.Println("Generating :", gen.inputPath)
 	service := gen.parser.Parse(gen.inputPath)
 	service.Apply()
@@ -43,29 +48,68 @@ func (gen *generator) Generate() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	endCode := endpointsGenerator(*service)
-	serviceCode := serviceGenerator(*service)
-	transportCode := transportGenerator(*service)
-	encodersCode := encoderDecoderGenerator(*service)
-	modelCode := modelGenerator(*service)
-	serverCode := mainCodeGenerator(*service)
-	repoCode := repositroyGenerator(*service)
-	wg.Add(7)
-	go genCode(service, gen, "endpoints", endCode, &wg)
-	go genCode(service, gen, "transport", transportCode, &wg)
-	go genCode(service, gen, "encoders", encodersCode, &wg)
-	go genCode(service, gen, "model", modelCode, &wg)
-	go genCode(service, gen, "server", serverCode, &wg)
-	go genCode(service, gen, "service", serviceCode, &wg)
-	go genCode(service, gen, "repository", repoCode, &wg)
+
+	wg.Add(8)
+	start := time.Now()
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		endCode := endpointsGenerator(*service)
+		genCode(service, gen, "endpoints", endCode)
+	}(&wg)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		transportCode := transportGenerator(*service)
+		genCode(service, gen, "transport", transportCode)
+	}(&wg)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		encoderCode := encoderDecoderGenerator(*service)
+		genCode(service, gen, "encoders", encoderCode)
+	}(&wg)
+
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		modelCode := modelGenerator(*service)
+		genCode(service, gen, "model", modelCode)
+	}(&wg)
+
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		serverCode := mainCodeGenerator(*service)
+		genCode(service, gen, "server", serverCode)
+	}(&wg)
+
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		serviceCode := serviceGenerator(*service)
+		genCode(service, gen, "service", serviceCode)
+	}(&wg)
+
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		repoCode := repositroyGenerator(*service)
+		genCode(service, gen, "repository", repoCode)
+	}(&wg)
+	go func(wg *sync.WaitGroup) {
+		defer wg.Done()
+		cacheCode := cacheGenerator(*service)
+		genCode(service, gen, "cache", cacheCode)
+
+	}(&wg)
+
 	wg.Wait()
+	fmt.Println(time.Since(start))
 
 	fmt.Println("Generating acomplished")
 }
-func genCode(s *model.Service, gen *generator, name string, code string, wg *sync.WaitGroup) {
-	defer wg.Done()
+func genCode(s *model.Service, gen *generator, name string, code string) {
 	if name == "repository" {
 		if !s.Repository.Value {
+			return
+		}
+	}
+	if name == "cache" {
+		if s.RedisCache.GetHost() == "" {
 			return
 		}
 	}

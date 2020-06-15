@@ -2,7 +2,9 @@ package gen
 
 import (
 	"fmt"
-	"go-kit-code-generator/model"
+
+	"github.com/samkhud/go-kit-code-generator/model"
+
 	"strings"
 )
 
@@ -14,7 +16,7 @@ func serviceGenerator(s model.Service) string {
 
 	fmt.Fprintf(&code, "type %s interface{\n", s.GetInterfaceName())
 	for _, endpoint := range s.Endpoints {
-		fmt.Fprintf(&code, "%s(", endpoint.GetName())
+		fmt.Fprintf(&code, "\n%s(", endpoint.GetName())
 		for _, arg := range endpoint.GetArgs() {
 			fmt.Fprintf(&code, "%s,", arg)
 		}
@@ -22,31 +24,57 @@ func serviceGenerator(s model.Service) string {
 		for _, out := range endpoint.GetOutputs() {
 			fmt.Fprintf(&code, "%s,", s.GetType(out))
 		}
-		fmt.Fprintf(&code, "error)\n")
+		fmt.Fprintf(&code, "error)")
 
 	}
+	if s.RedisCache.GetHost() != "" {
+		fmt.Fprintf(&code, "\nGetCache()Cache")
+
+	}
+
 	fmt.Fprintf(&code, "%s\n", "}")
 
 	fmt.Fprintf(&code, "type %s struct{\n", s.GetServiceName())
 	if s.Repository.Value {
-		fmt.Fprintf(&code, "%s\n", "logger log.Logger\n repository Repository")
+		if s.RedisCache.GetHost() != "" {
+			fmt.Fprintf(&code, "%s\n", "logger log.Logger\n repository Repository\ncache Cache")
+
+		} else {
+			fmt.Fprintf(&code, "%s\n", "logger log.Logger\n repository Repository")
+
+		}
 
 	} else {
-		fmt.Fprintf(&code, "%s\n", "logger log.Logger\n")
+		if s.RedisCache.GetHost() != "" {
+			fmt.Fprintf(&code, "%s\n", "logger log.Logger\ncache Cache")
+
+		} else {
+			fmt.Fprintf(&code, "%s\n", "logger log.Logger\n")
+
+		}
 
 	}
 
 	fmt.Fprintf(&code, "%s\n", "}")
 	if s.Repository.Value {
+		if s.RedisCache.GetHost() != "" {
+			fmt.Fprintf(&code, "func NewService(logger log.Logger,repository Repository,cache Cache)%s{\n return &%s{\n logger:logger,\n repository:repository,\ncache:cache,\n}}\n", s.GetInterfaceName(), s.GetServiceName())
 
-		fmt.Fprintf(&code, "func NewService(logger log.Logger,repository Repository)%s{\n return &%s{\n logger:logger,\n repository:repository,\n}}\n", s.GetInterfaceName(), s.GetServiceName())
+		} else {
+			fmt.Fprintf(&code, "func NewService(logger log.Logger,repository Repository)%s{\n return &%s{\n logger:logger,\n repository:repository,\n}}\n", s.GetInterfaceName(), s.GetServiceName())
+		}
+
 	} else {
-		fmt.Fprintf(&code, "func NewService(logger log.Logger)%s{\n return &%s{\n logger:logger,\n}}\n", s.GetInterfaceName(), s.GetServiceName())
+		if s.RedisCache.GetHost() != "" {
+			fmt.Fprintf(&code, "func NewService(logger log.Logger)%s{\n return &%s{\n logger:logger,\ncache:cache,\n}}\n", s.GetInterfaceName(), s.GetServiceName())
+		} else {
+			fmt.Fprintf(&code, "func NewService(logger log.Logger)%s{\n return &%s{\n logger:logger,\n}}\n", s.GetInterfaceName(), s.GetServiceName())
+		}
 
 	}
 
 	for _, endpoint := range s.Endpoints {
-		fmt.Fprintf(&code, "func(s *%s)%s(", s.GetServiceName(), endpoint.GetName())
+		fmt.Fprintf(&code, "\nfunc(s *%s)%s(", s.GetServiceName(), endpoint.GetName())
 		for _, arg := range endpoint.GetArgs() {
 			fmt.Fprintf(&code, "%s,", arg)
 		}
@@ -84,8 +112,14 @@ func serviceGenerator(s model.Service) string {
 
 		}
 
-		fmt.Fprintf(&code, "}\n")
+		fmt.Fprintf(&code, "}")
+
+	}
+	if s.RedisCache.Host != "" {
+		fmt.Fprintf(&code, "\nfunc(s *%s)GetCache()Cache{\n", s.GetServiceName())
+		fmt.Fprintf(&code, "\nreturn s.cache\n}")
 
 	}
 	return code.String()
+
 }

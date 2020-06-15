@@ -26,15 +26,21 @@ The program needs dep to download all the packages needed in the code
 6. Endpoint file that contains all the endpoints specified in the yaml file
 7. Repository can be generated and connected to a database.
 8. The supported databases are mysql and postgress
+9. Caching layer using redis can be generated to cash all Get requests for a specified amount of time
 
 ## Future features:
+tests will be added to the generated code
 
-A caching layer will be generated at request
 
 ## Example of a .yaml file:
 
 ```yaml
-name: chatService
+name: userService
+redis_cache:
+  host: host
+  password: password
+  db: 0
+
 endpoints:
   -
     name: CreateUser
@@ -45,8 +51,9 @@ endpoints:
       path: /user
   -
     name: GetUser
-    args: id string 
+    args: id string
     output: user User
+    cache_time: 10000
     transport:
       method: GET
       path: /user/{id}
@@ -57,7 +64,15 @@ endpoints:
     transport:
       method: PUT
       path: /user/update
-
+  -
+    name: GetAllUsers
+    args:
+    output: users []User
+    cache_time: 10000
+    transport:
+      method: GET
+      path: /user/
+  
 repository:
   value: true
   db:

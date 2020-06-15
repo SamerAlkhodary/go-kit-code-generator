@@ -2,7 +2,9 @@ package gen
 
 import (
 	"fmt"
-	"go-kit-code-generator/model"
+
+	"github.com/samkhud/go-kit-code-generator/model"
+
 	"strings"
 )
 
@@ -22,14 +24,30 @@ func mainCodeGenerator(s model.Service) string {
 		fmt.Fprintf(&code, "\nif err!=nil{\nlevel.Error(logger).Log(%q,err)\nos.Exit(-1)\n}\n}\n", "exit")
 
 		fmt.Fprintf(&code, "\n repository:= MakeNewRepository(db,logger)\n")
+		if s.RedisCache.GetHost() != "" {
+			fmt.Fprintf(&code, "\ncache:= MakeNewRedisCache(%q,%q,%d)\n", s.RedisCache.GetHost(), s.RedisCache.Password, s.RedisCache.Db)
+
+		}
 
 	}
 	fmt.Fprintf(&code, "\nflag.Parse()\nctx:=context.Background()")
 	if s.Repository.Value {
-		fmt.Fprintf(&code, "\nvar service %s\n{\nservice= NewService(logger,repository)\n}\n", s.GetInterfaceName())
+		if s.RedisCache.GetHost() != "" {
+			fmt.Fprintf(&code, "\nvar service %s\n{\nservice= NewService(logger,repository,cache)\n}\n", s.GetInterfaceName())
+
+		} else {
+			fmt.Fprintf(&code, "\nvar service %s\n{\nservice= NewService(logger,repository)\n}\n", s.GetInterfaceName())
+
+		}
 
 	} else {
-		fmt.Fprintf(&code, "\nvar service %s\n{\nservice= NewService(logger)\n}\n", s.GetInterfaceName())
+		if s.RedisCache.GetHost() != "" {
+			fmt.Fprintf(&code, "\nvar service %s\n{\nservice= NewService(logger,cache)\n}\n", s.GetInterfaceName())
+
+		} else {
+			fmt.Fprintf(&code, "\nvar service %s\n{\nservice= NewService(logger)\n}\n", s.GetInterfaceName())
+
+		}
 
 	}
 	fmt.Fprintf(&code, "\nerrs:=make(chan error)\ngo func(){\n")

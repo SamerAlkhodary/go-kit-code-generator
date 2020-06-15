@@ -2,7 +2,9 @@ package gen
 
 import (
 	"fmt"
-	"go-kit-code-generator/model"
+
+	"github.com/samkhud/go-kit-code-generator/model"
+
 	"strings"
 )
 
@@ -10,8 +12,7 @@ func repositroyGenerator(s model.Service) string {
 	var code strings.Builder
 	code.Grow(1000)
 	fmt.Fprintf(&code, "package %s", s.GetServiceName())
-	fmt.Fprintf(&code, "\nimport(\n%q\n%q\n%q\n%q\n)", "context", "errors", "github.com/go-kit/kit/log", "database/sql")
-	fmt.Fprintf(&code, "\nvar RepoError= errros.New(%q)", "Unable to handle repo request")
+	fmt.Fprintf(&code, "\nimport(\n%q\n%q\n%q\n)", "context", "github.com/go-kit/kit/log", "database/sql")
 	fmt.Fprintf(&code, " \ntype Repository interface{\n")
 	for _, endpoint := range s.Endpoints {
 		fmt.Fprintf(&code, "\n%s(", endpoint.GetName())

@@ -1,4 +1,9 @@
-name: chatService
+name: userService
+redis_cache:
+  host: host
+  password: password
+  db: 0
+
 endpoints:
   -
     name: CreateUser
@@ -9,8 +14,9 @@ endpoints:
       path: /user
   -
     name: GetUser
-    args: id string 
+    args: id string
     output: user User
+    cache_time: 10000
     transport:
       method: GET
       path: /user/{id}
@@ -21,7 +27,15 @@ endpoints:
     transport:
       method: PUT
       path: /user/update
-      
+  -
+    name: GetAllUsers
+    args:
+    output: users []User
+    cache_time: 10000
+    transport:
+      method: GET
+      path: /user/
+  
 repository:
   value: true
   db:

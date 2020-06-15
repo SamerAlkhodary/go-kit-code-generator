@@ -13,6 +13,12 @@ type Service struct {
 	Endpoints  []Endpoint `yaml:"endpoints"`
 	Models     []Model    `yaml:"model"`
 	Repository Repository `yaml:"repository"`
+	RedisCache Cache      `yaml:"redis_cache"`
+}
+type Cache struct {
+	Host     string `yaml:"host"`
+	Password string `yaml:"password"`
+	Db       int    `yaml:"db"`
 }
 type Repository struct {
 	Value bool `yaml:"value"`
@@ -26,6 +32,7 @@ type Endpoint struct {
 	Name      string    `yaml:"name"`
 	Args      string    `yaml:"args"`
 	Output    string    `yaml:"output"`
+	CacheTime int       `yaml:"cache_time"`
 	Transport Transport `yaml:"transport"`
 }
 type Transport struct {
@@ -55,7 +62,25 @@ func init() {
 	goTypes["int32"] = true
 	goTypes["int64"] = true
 	goTypes["bool"] = true
+	goTypes["string"] = true
+	goTypes["int"] = true
+	goTypes["[]float32"] = true
+	goTypes["[]float64"] = true
+	goTypes["[]byte"] = true
+	goTypes["[]uint"] = true
+	goTypes["[]uint8"] = true
+	goTypes["[]uint16"] = true
+	goTypes["[]uint32"] = true
+	goTypes["[]uint64"] = true
+	goTypes["[]int8"] = true
+	goTypes["[]int16"] = true
+	goTypes["[]int32"] = true
+	goTypes["[]int64"] = true
+	goTypes["[]bool"] = true
 
+}
+func (c *Cache) GetHost() string {
+	return c.Host
 }
 func (r *Repository) GetDB() DB {
 	return r.DB
@@ -71,10 +96,13 @@ var compileErr = errors.New("Compiling error")
 
 func (endpoint *Endpoint) GetArgs() []string {
 
-	return strings.Split(strings.TrimSpace(endpoint.Args), ",")
+	return filterEmpty(strings.Split(strings.TrimSpace(endpoint.Args), ","))
+}
+func (endpoint *Endpoint) GetCacheTime() int {
+	return endpoint.CacheTime
 }
 func (endpoint *Endpoint) GetOutputs() []string {
-	return strings.Split(endpoint.Output, ",")
+	return filterEmpty(strings.Split(endpoint.Output, ","))
 }
 func (s *Service) GetVariableName(in string, private bool) string {
 	if private {
@@ -149,6 +177,8 @@ func checkServiceError(s *Service) error {
 func (s *Service) Apply() {
 	for _, m := range s.Models {
 		goTypes[m.GetName(false)] = true
+		s := fmt.Sprintf("[]%s", m.GetName(false))
+		goTypes[s] = true
 	}
 }
 
@@ -159,10 +189,15 @@ func checkEndpointError(s *Service) error {
 
 		}
 		for _, arg := range endpoint.GetArgs() {
-			if len(strings.Split(strings.TrimSpace(arg), " ")) < 2 {
-				return fmt.Errorf("Mising type or variable name in %s endpoint  :%v", endpoint.GetName(), compileErr)
+			if strings.TrimSpace(arg) != "" {
+				if len(strings.Split(strings.TrimSpace(arg), " ")) < 2 {
+					fmt.Println(len(strings.Split(strings.TrimSpace(arg), " ")))
+					fmt.Println(strings.Split(strings.TrimSpace(arg), " "))
+					return fmt.Errorf("Mising type or variable name in %s endpoint  :%v", endpoint.GetName(), compileErr)
+				}
 
 			}
+
 			if !goTypes[s.GetType(arg)] {
 
 				return fmt.Errorf("Unrecognised type %q in %s endpoint: %v", s.GetType(arg), endpoint.GetName(), compileErr)
@@ -172,9 +207,11 @@ func checkEndpointError(s *Service) error {
 			}
 		}
 		for _, out := range endpoint.GetOutputs() {
-			if len(strings.Split(strings.TrimSpace(out), " ")) < 2 {
-				return fmt.Errorf("Mising type or variable name in %s endpoint  :%v", endpoint.GetName(), compileErr)
+			if strings.TrimSpace(out) != "" {
+				if len(strings.Split(strings.TrimSpace(out), " ")) < 2 {
+					return fmt.Errorf("Mising type or variable name in %s endpoint  :%v", endpoint.GetName(), compileErr)
 
+				}
 			}
 			if !goTypes[s.GetType(out)] {
 				return fmt.Errorf("Unrecognised type %q in %s endpoint: %v", s.GetType(out), endpoint.GetName(), compileErr)
@@ -209,4 +246,14 @@ func checkModelError(s *Service) error {
 	}
 	return nil
 
+}
+func filterEmpty(arr []string) []string {
+	tmp := arr[:0]
+	for _, elem := range arr {
+		if elem != "" {
+			tmp = append(tmp, elem)
+
+		}
+	}
+	return tmp
 }
