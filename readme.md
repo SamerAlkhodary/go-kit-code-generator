@@ -12,7 +12,6 @@ go build -o go-gen
 2. Run the shell code
 ```
 ./gen.bash
-
 ```
 ## .yaml:
 
