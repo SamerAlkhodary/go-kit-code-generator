@@ -29,7 +29,7 @@ The program needs dep to download all the packages needed in the code
 9. Caching layer using redis can be generated to cash all Get requests for a specified amount of time
 
 ## Future features:
-tests will be added to the generated code
+The option to create and run the service in a Docker container will be added.
 
 
 ## Example of a .yaml file:
