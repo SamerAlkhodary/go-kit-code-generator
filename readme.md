@@ -7,18 +7,23 @@ The program needs dep to download all the packages needed in the code
 ## How to use:
 1. Compile the code using this command
 ```
-go build -o go-gen
+  go build -o [binary name]
 ```
-2. Run the shell code
+2. Run program
+
 ```
-./gen.bash
+  ./[binary name] <command> [argumnets]
 ```
+3. a.the coomands are: 
+   * `gt`  generates an empty .yaml template 
+   * `gs`  generates a service from a .yaml file
 ## .yaml:
 
 1. The yaml file should contain the name of the service.
 2. The yaml file should contain at least one endpoint inorder to generate the code
 3. The transport method and path should be provided for each and every endpoint in order to generate the code.
-4. Model is optional
+4. Model is optional.
+5. Caching layer is optional.
 
 ## The generated files:
 
