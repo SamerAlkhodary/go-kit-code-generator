@@ -5,10 +5,14 @@
 The program needs dep to download all the packages needed in the code
 
 ## How to use:
-
-1. Fill a (serviceName).yaml file
-2. run gen.sh script and follow instructions
-
+1. Compile the code using this command
+```
+go build -o go-gen
+```
+2. Run the shell code
+```
+./gen.bash
+```
 ## .yaml:
 
 1. The yaml file should contain the name of the service.
@@ -29,7 +33,7 @@ The program needs dep to download all the packages needed in the code
 9. Caching layer using redis can be generated to cash all Get requests for a specified amount of time
 
 ## Future features:
-tests will be added to the generated code
+The option to create and run the service in a Docker container will be added.
 
 
 ## Example of a .yaml file:
@@ -58,20 +62,13 @@ endpoints:
       method: GET
       path: /user/{id}
   -
-    name: UpdateUser
-    args: id string, profilePic string
-    output: message string
-    transport:
-      method: PUT
-      path: /user/update
-  -
     name: GetAllUsers
     args:
     output: users []User
     cache_time: 10000
     transport:
       method: GET
-      path: /user/
+      path: /users
   
 repository:
   value: true
