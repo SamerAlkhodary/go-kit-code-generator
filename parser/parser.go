@@ -14,7 +14,7 @@ type Parser struct {
 func (parser *Parser) Parse(path string) *model.Service {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Printf("error while reading file: %v", err)
+		log.Printf("error while reading file (%s): %v", path, err)
 
 	}
 	service := model.Service{}

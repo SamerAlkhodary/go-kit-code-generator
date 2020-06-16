@@ -19,11 +19,10 @@ type generator struct {
 	parser     parser.Parser
 }
 
-func CreateGenerator(inputPath string, outputPath string, parser parser.Parser) *generator {
+func CreateGenerator(parser parser.Parser) *generator {
 	return &generator{
-		inputPath:  inputPath,
-		outputPath: outputPath,
-		parser:     parser,
+
+		parser: parser,
 	}
 }
 func (gen *generator) GetInputPath() string {
@@ -36,9 +35,41 @@ func (gen *generator) GetOutputPath() string {
 func (gen *generator) GetParser() *parser.Parser {
 	return &gen.parser
 }
+func (gen *generator) GenerateTemplate(path string, title string) {
+	code := templateGenerator()
+	createPath(path)
+	p := fmt.Sprintf("%s/%s", path, title)
 
-func (gen *generator) Generate() {
+	file, err := os.Create(p)
+	if err != nil {
+		log.Printf("error while creating file:%v", err)
+	}
+
+	file.WriteString(code)
+	defer file.Close()
+
+}
+func (gen *generator) GenerateDockerImage() {
+	log.Println("Generating :", gen.inputPath)
+	service := gen.parser.Parse(gen.inputPath)
+	service.Apply()
+	err := service.CheckForError()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+}
+func createPath(p string) {
+	e := os.Mkdir(p, 0700)
+	if e != nil {
+		log.Printf("error:%v", e)
+	}
+
+}
+func (gen *generator) GenerateService(inputPath string, outputPath string) {
 	var wg sync.WaitGroup
+	gen.inputPath = inputPath
+	gen.outputPath = outputPath
 
 	log.Println("Generating :", gen.inputPath)
 	service := gen.parser.Parse(gen.inputPath)
@@ -48,7 +79,7 @@ func (gen *generator) Generate() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	createPath(outputPath)
 	wg.Add(8)
 	start := time.Now()
 	go func(wg *sync.WaitGroup) {
@@ -115,6 +146,7 @@ func genCode(s *model.Service, gen *generator, name string, code string) {
 	}
 
 	path := fmt.Sprintf("%s/%s.go", gen.outputPath, name)
+
 	file, err := os.Create(path)
 	if err != nil {
 		log.Printf("error while creating file:%v", err)
