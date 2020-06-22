@@ -34,7 +34,7 @@ endpoints:
     cache_time: 10000
     transport:
       method: GET
-      path: /user/
+      path: /user
   
 repository:
   value: true

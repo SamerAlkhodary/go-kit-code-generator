@@ -1,8 +1,8 @@
 package parser
 
 import (
+	"fmt"
 	"io/ioutil"
-	"log"
 
 	"github.com/samkhud/go-kit-code-generator/model"
 	"gopkg.in/yaml.v2"
@@ -11,15 +11,19 @@ import (
 type Parser struct {
 }
 
-func (parser *Parser) Parse(path string) *model.Service {
+func (parser *Parser) Parse(path string) (*model.Service, error) {
 	file, err := ioutil.ReadFile(path)
 	if err != nil {
-		log.Printf("error while reading file (%s): %v", path, err)
+		return nil, fmt.Errorf("error while reading file (%s): %v", path, err)
 
 	}
 	service := model.Service{}
-	yaml.Unmarshal([]byte(file), &service)
+	er := yaml.Unmarshal([]byte(file), &service)
+	if er != nil {
+		return nil, fmt.Errorf("error in Yaml: %v", er)
 
-	return &service
+	}
+
+	return &service, nil
 
 }

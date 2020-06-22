@@ -51,7 +51,10 @@ func (gen *generator) GenerateTemplate(path string, title string) {
 }
 func (gen *generator) GenerateDockerImage() {
 	log.Println("Generating :", gen.inputPath)
-	service := gen.parser.Parse(gen.inputPath)
+	service, er := gen.parser.Parse(gen.inputPath)
+	if er != nil {
+		log.Fatal(er)
+	}
 	service.Apply()
 	err := service.CheckForError()
 	if err != nil {
@@ -72,10 +75,12 @@ func (gen *generator) GenerateService(inputPath string, outputPath string) {
 	gen.outputPath = outputPath
 
 	log.Println("Generating :", gen.inputPath)
-	service := gen.parser.Parse(gen.inputPath)
+	service, er := gen.parser.Parse(gen.inputPath)
+	if er != nil {
+		log.Fatal(er)
+	}
 	service.Apply()
 	err := service.CheckForError()
-	fmt.Println(err)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -135,7 +140,9 @@ func (gen *generator) GenerateService(inputPath string, outputPath string) {
 }
 func genCode(s *model.Service, gen *generator, name string, code string) {
 	if name == "repository" {
+		log.Println(s.Repository)
 		if !s.Repository.Value {
+			log.Println(("no repository required"))
 			return
 		}
 	}

@@ -30,8 +30,8 @@ type DB struct {
 }
 type Endpoint struct {
 	Name      string    `yaml:"name"`
-	Args      string    `yaml:"args"`
-	Output    string    `yaml:"output"`
+	Args      []string  `yaml:"args"`
+	Output    []string  `yaml:"output"`
 	CacheTime int       `yaml:"cache_time"`
 	Transport Transport `yaml:"transport"`
 }
@@ -40,8 +40,8 @@ type Transport struct {
 	Path   string `yaml:"path"`
 }
 type Model struct {
-	Name       string `yaml:"name"`
-	Attributes string `yaml:"attr"`
+	Name       string   `yaml:"name"`
+	Attributes []string `yaml:"attr"`
 }
 
 var goTypes = make(map[string]bool)
@@ -77,6 +77,7 @@ func init() {
 	goTypes["[]int32"] = true
 	goTypes["[]int64"] = true
 	goTypes["[]bool"] = true
+	goTypes["[]string"] = true
 
 }
 func (c *Cache) GetHost() string {
@@ -96,13 +97,13 @@ var compileErr = errors.New("Compiling error")
 
 func (endpoint *Endpoint) GetArgs() []string {
 
-	return filterEmpty(strings.Split(strings.TrimSpace(endpoint.Args), ","))
+	return filterEmpty(endpoint.Args)
 }
 func (endpoint *Endpoint) GetCacheTime() int {
 	return endpoint.CacheTime
 }
 func (endpoint *Endpoint) GetOutputs() []string {
-	return filterEmpty(strings.Split(endpoint.Output, ","))
+	return filterEmpty(endpoint.Output)
 }
 func (s *Service) GetVariableName(in string, private bool) string {
 	if private {
@@ -113,7 +114,7 @@ func (s *Service) GetVariableName(in string, private bool) string {
 
 }
 func (m *Model) GetModelAttributes() []string {
-	return strings.Split(strings.TrimSpace(m.Attributes), ",")
+	return m.Attributes
 }
 func (m *Model) GetName(private bool) string {
 	if private {
@@ -234,11 +235,11 @@ func checkModelError(s *Service) error {
 		}
 		for _, attr := range m.GetModelAttributes() {
 			if len(strings.Split(strings.TrimSpace(attr), " ")) < 2 {
-				return fmt.Errorf("Mising type or variable name in %s endpoint  :%v", m.GetName(false), compileErr)
+				return fmt.Errorf("Mising type or variable name in %s model  :%v", m.GetName(false), compileErr)
 
 			}
 			if goTypes[s.GetType(attr)] == false {
-				return fmt.Errorf("Unrecognised type %q in %s endpoint: %v", s.GetType(attr), m.GetName(false), compileErr)
+				return fmt.Errorf("Unrecognised type %q in %s model: %v", s.GetType(attr), m.GetName(false), compileErr)
 			}
 
 		}
