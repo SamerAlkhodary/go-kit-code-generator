@@ -1,0 +1,78 @@
+name: eventService
+endpoints:
+ -
+    name: GetEvents
+    args: 
+    output: 
+         - events []Event
+    transport:
+        method: GET
+        path: /events{id}
+ -
+    name: AddEvents
+    args: 
+         - "event []Event"
+    output: 
+         - message string
+    transport:
+        method: POST
+        path: /events		
+
+repository:
+     value: true
+     db: 
+        name: mysql
+        address: samer:fmt.Println(123)@tcp(localhost)/events
+model:
+ -
+    name: Event
+    attr: 
+        - name string          db:varchar(100) not null
+        - id int64             db:int unsigned auto_increment primary key
+        - description string   db:text null
+        - startDate string     db:datetime not null
+        - endDate string       db:datetime not null
+        - image string         db:varchar(200) null
+        - url string           db:varchar(200) null
+        - images []string      db:varchar(200) null
+        - eventSort string     db:varchar(10) not null
+        - location Location    
+        - organizer Organizer
+        - offer Offer
+        
+ -
+    name: Location
+    attr: 
+        - name string
+        - description string
+        - url string
+        - telephone string
+        - address Address
+        - geo Geo
+        - id int64
+ -
+    name: Organizer
+    attr: 
+        - name string
+        - logo string
+        - url string
+        - email string
+        - telephone string
+ -
+    name: Geo
+    attr: 
+        - latitude float64
+        - longitude float64
+ -
+    name: Address
+    attr: 
+        - streetAddress string
+        - addressLocality string
+        - addressCounty string
+        - podtalCode string
+ -
+    name: Offer	
+    attr: 
+        - price string
+        - url string		
+                        

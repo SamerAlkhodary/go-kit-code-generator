@@ -182,6 +182,14 @@ func (s *Service) Apply() {
 		goTypes[s] = true
 	}
 }
+func (m *Model) DBType(attr string) string {
+	return strings.Split(attr, "db:")[1]
+
+}
+func (m *Model) Attr(attr string) string {
+	return strings.Split(attr, "db:")[0]
+
+}
 
 func checkEndpointError(s *Service) error {
 	for _, endpoint := range s.Endpoints {
