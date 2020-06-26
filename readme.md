@@ -53,27 +53,42 @@ redis_cache:
 endpoints:
   -
     name: CreateUser
-    args: user User
-    output: id string
+    args: 
+      - user User
+    output: 
+      - id string
     transport: 
       method: POST
       path: /user
   -
     name: GetUser
-    args: id string
-    output: user User
+    args: 
+      - id string
+    output: 
+      - user User
     cache_time: 10000
     transport:
       method: GET
       path: /user/{id}
   -
+    name: UpdateUser
+    args: 
+      - id string
+      - profilePic string
+    output: 
+      - message string
+    transport:
+      method: PUT
+      path: /user/update
+  -
     name: GetAllUsers
     args:
-    output: users []User
+    output: 
+      - users []User
     cache_time: 10000
     transport:
       method: GET
-      path: /users
+      path: /user
   
 repository:
   value: true
@@ -84,5 +99,9 @@ repository:
 model:
   -
     name: User
-    attr: firstName string, lastName string , profilePic string , token string
+    attr: 
+      - firstName string 
+      - lastName string  
+      - profilePic string 
+      - token string
 ```
