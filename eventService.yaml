@@ -11,7 +11,7 @@ endpoints:
  -
     name: AddEvents
     args: 
-         - "event []Event"
+         - event []Event
     output: 
          - message string
     transport:
