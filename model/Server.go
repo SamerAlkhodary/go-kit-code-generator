@@ -11,7 +11,7 @@ import (
 type Service struct {
 	Name       string     `yaml:"name"`
 	Endpoints  []Endpoint `yaml:"endpoints"`
-	Models     []Model    `yaml:"model"`
+	Models     []*Model   `yaml:"model"`
 	Repository Repository `yaml:"repository"`
 	RedisCache Cache      `yaml:"redis_cache"`
 }
@@ -40,8 +40,9 @@ type Transport struct {
 	Path   string `yaml:"path"`
 }
 type Model struct {
-	Name       string   `yaml:"name"`
-	Attributes []string `yaml:"attr"`
+	Name             string   `yaml:"name"`
+	StringAttributes []string `yaml:"attr"`
+	Attributes       []Attribute
 }
 
 var goTypes = make(map[string]bool)
@@ -80,6 +81,18 @@ func init() {
 	goTypes["[]string"] = true
 
 }
+func (s *Service) IsNativeType(typ string) bool {
+
+	return goTypes[typ]
+
+}
+func (s *Service) IsAddedType(typ string) bool {
+	if val, ok := goTypes[typ]; ok {
+		return !val
+	}
+	return false
+
+}
 func (c *Cache) GetHost() string {
 	return c.Host
 }
@@ -113,7 +126,7 @@ func (s *Service) GetVariableName(in string, private bool) string {
 	}
 
 }
-func (m *Model) GetModelAttributes() []string {
+func (m *Model) GetModelAttributes() []Attribute {
 	return m.Attributes
 }
 func (m *Model) GetName(private bool) string {
@@ -177,9 +190,19 @@ func checkServiceError(s *Service) error {
 }
 func (s *Service) Apply() {
 	for _, m := range s.Models {
-		goTypes[m.GetName(false)] = true
-		s := fmt.Sprintf("[]%s", m.GetName(false))
-		goTypes[s] = true
+		goTypes[m.GetName(false)] = false
+		str := fmt.Sprintf("[]%s", m.GetName(false))
+		goTypes[str] = false
+		for _, attr := range m.StringAttributes {
+			data := strings.Split(attr, "db=")
+			if len(data) > 1 {
+				m.Attributes = append(m.Attributes, *NewAttribute(s.GetVariableName(data[0], true), s.GetType(data[0]), data[1]))
+			} else {
+				m.Attributes = append(m.Attributes, *NewAttribute(s.GetVariableName(data[0], true), s.GetType(data[0]), "--TODO: write type"))
+			}
+
+		}
+
 	}
 }
 
@@ -192,14 +215,13 @@ func checkEndpointError(s *Service) error {
 		for _, arg := range endpoint.GetArgs() {
 			if strings.TrimSpace(arg) != "" {
 				if len(strings.Split(strings.TrimSpace(arg), " ")) < 2 {
-					fmt.Println(len(strings.Split(strings.TrimSpace(arg), " ")))
-					fmt.Println(strings.Split(strings.TrimSpace(arg), " "))
+
 					return fmt.Errorf("Mising type or variable name in %s endpoint  :%v", endpoint.GetName(), compileErr)
 				}
 
 			}
 
-			if !goTypes[s.GetType(arg)] {
+			if !s.IsNativeType(s.GetType(arg)) && !s.IsAddedType(s.GetType(arg)) {
 
 				return fmt.Errorf("Unrecognised type %q in %s endpoint: %v", s.GetType(arg), endpoint.GetName(), compileErr)
 			}
@@ -214,36 +236,33 @@ func checkEndpointError(s *Service) error {
 
 				}
 			}
-			if !goTypes[s.GetType(out)] {
+			if !s.IsNativeType(s.GetType(out)) && !s.IsAddedType(s.GetType(out)) {
 				return fmt.Errorf("Unrecognised type %q in %s endpoint: %v", s.GetType(out), endpoint.GetName(), compileErr)
 			}
-
 		}
-
 	}
 	return nil
 
 }
 func checkModelError(s *Service) error {
+
 	if len(s.Models) == 0 {
 		return nil
 	}
 	for _, m := range s.Models {
+
 		if m.GetName(false) == "" {
 			return fmt.Errorf("Missing model name:%v", compileErr)
-
 		}
-		for _, attr := range m.GetModelAttributes() {
+		for _, attr := range m.StringAttributes {
 			if len(strings.Split(strings.TrimSpace(attr), " ")) < 2 {
 				return fmt.Errorf("Mising type or variable name in %s model  :%v", m.GetName(false), compileErr)
 
 			}
-			if goTypes[s.GetType(attr)] == false {
+			if !s.IsNativeType(s.GetType(attr)) && !s.IsAddedType(s.GetType(attr)) {
 				return fmt.Errorf("Unrecognised type %q in %s model: %v", s.GetType(attr), m.GetName(false), compileErr)
 			}
-
 		}
-
 	}
 	return nil
 

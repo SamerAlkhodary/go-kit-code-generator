@@ -3,7 +3,6 @@ redis_cache:
   host: host
   password: password
   db: 0
-
 endpoints:
   -
     name: CreateUser
@@ -49,12 +48,11 @@ repository:
   db:
     name: mysql
     address: address
-
 model:
   -
     name: User
     attr: 
-      - firstName string 
-      - lastName string  
-      - profilePic string 
-      - token string
+      - firstName string    db= varchar(50) primary key
+      - lastName string     db= varchar(20)
+      - profilePic string   db= varchar(200)
+      - token string        
