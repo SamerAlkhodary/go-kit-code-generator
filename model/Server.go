@@ -93,6 +93,13 @@ func (s *Service) IsAddedType(typ string) bool {
 	return false
 
 }
+func (s *Service) IsArray(typ string) bool {
+	if _, ok := goTypes[typ]; ok {
+		return strings.Contains(typ, "[]")
+	}
+	return false
+
+}
 func (c *Cache) GetHost() string {
 	return c.Host
 }

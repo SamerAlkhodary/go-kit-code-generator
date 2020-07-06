@@ -27,11 +27,14 @@ func (dg *dbGenerator) run(outputPath string) {
 	dg.generateFile(outputPath)
 }
 
+type Pair struct {
+	modelName string
+	primeKey  model.Attribute
+}
+
 func (dg *dbGenerator) generateCode() {
-	type Pair struct {
-		modelName string
-		primeKey  model.Attribute
-	}
+	var arrs []model.Attribute
+
 	var code strings.Builder
 	code.Grow(1000)
 	dependencies := make(map[string][]Pair)
@@ -39,7 +42,10 @@ func (dg *dbGenerator) generateCode() {
 		fmt.Fprintf(&code, "\nCREATE TABLE %ss\n(\n", m.GetName(true))
 
 		for _, attr := range m.GetModelAttributes() {
-			if !dg.s.IsAddedType(attr.DataType) {
+			if dg.s.IsArray(attr.DataType) {
+				arrs = append(arrs, attr)
+			}
+			if !dg.s.IsAddedType(attr.DataType) && !dg.s.IsArray(attr.DataType) {
 				fmt.Fprintf(&code, "%s %s ,\n", attr.GetName(true), attr.GetDBType())
 			} else {
 
@@ -49,6 +55,7 @@ func (dg *dbGenerator) generateCode() {
 				}
 
 				dependencies[attr.GetName(true)] = append(dependencies[attr.GetName(true)], p)
+				log.Println(dependencies)
 
 			}
 		}
@@ -60,7 +67,9 @@ func (dg *dbGenerator) generateCode() {
 		fmt.Fprintf(&code, "timestamp   timestamp default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP")
 		fmt.Fprintf(&code, "\n);")
 	}
-
+	for _, arrElement := range arrs {
+		fmt.Fprintf(&code, "%s", arrayHandler(arrElement, dependencies[arrElement.GetName(true)][0]))
+	}
 	dg.code = code.String()
 
 }
@@ -87,4 +96,14 @@ func (dg *dbGenerator) generateFile(outputPath string) {
 
 	file.WriteString(dg.code)
 	defer file.Close()
+}
+func arrayHandler(attr model.Attribute, p Pair) string {
+	var tmp strings.Builder
+	fmt.Fprintf(&tmp, "\nCREATE TABLE %s\n(\n", attr.GetName(true))
+	fmt.Fprintf(&tmp, "%s%s %s  NOT NULL  ,\n", p.modelName, p.primeKey.GetName(true), "--TODO write type")
+	fmt.Fprintf(&tmp, "%s %s   NULL  ,\n", "element", attr.GetDBType())
+	fmt.Fprintf(&tmp, "timestamp   timestamp default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP")
+	fmt.Fprintf(&tmp, "\n);")
+	return tmp.String()
+
 }

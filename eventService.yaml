@@ -36,7 +36,7 @@ model:
         - url string           db=varchar(200) null
         - images []string      db=varchar(200) null
         - eventSort string     db=varchar(10) not null
-        - location Location    
+        - location Location     db=int unsigned auto_increment primary key
         - organizer Organizer
         - offer Offer
         
