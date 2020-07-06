@@ -1,4 +1,5 @@
 name: eventService
+keys: true 
 endpoints:
  -
     name: GetEvents

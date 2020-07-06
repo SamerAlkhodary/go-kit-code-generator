@@ -28,6 +28,9 @@ func (cg *cacheGenerator) run(outputPath string) {
 	cg.generateCode()
 	cg.generateFile(outputPath)
 }
+func (cg *cacheGenerator) GetFileName() string {
+	return cg.outputFile
+}
 
 func (cg *cacheGenerator) generateCode() {
 

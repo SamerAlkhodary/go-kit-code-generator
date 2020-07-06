@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"sync"
 	"time"
 
@@ -74,6 +75,10 @@ func (gen *generator) GenerateService(inputPath string, outputPath string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	if service.HasKeys() {
+		createPath("keys")
+
+	}
 	var generators []fileGenerator
 	generators = append(generators, createCacheGenerator(*service, "cache"))
 	generators = append(generators, createDbGenerator(*service, "db"))
@@ -100,6 +105,12 @@ func (gen *generator) GenerateService(inputPath string, outputPath string) {
 
 	wg.Wait()
 	fmt.Println(time.Since(start))
+	for _, f := range generators {
+		p := fmt.Sprintf("%s/%s.go", service.GetServiceName(), f.GetFileName())
+		cmd := exec.Command("go", "fmt", p)
+		cmd.Run()
+
+	}
 
 	fmt.Println("Generating acomplished")
 }

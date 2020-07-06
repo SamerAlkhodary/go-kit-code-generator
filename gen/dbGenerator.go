@@ -21,6 +21,9 @@ func createDbGenerator(s model.Service, outputFile string) fileGenerator {
 		s:          s,
 	}
 }
+func (dg *dbGenerator) GetFileName() string {
+	return dg.outputFile
+}
 
 func (dg *dbGenerator) run(outputPath string) {
 	dg.generateCode()

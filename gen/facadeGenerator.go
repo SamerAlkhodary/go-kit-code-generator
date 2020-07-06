@@ -22,6 +22,9 @@ func createMainGenerator(s model.Service, outputFile string) fileGenerator {
 		s:          s,
 	}
 }
+func (mg *mainCodeGenerator) GetFileName() string {
+	return mg.outputFile
+}
 
 func (mg *mainCodeGenerator) run(outputPath string) {
 	mg.generateCode()
@@ -31,8 +34,14 @@ func (mg *mainCodeGenerator) generateCode() {
 	var code strings.Builder
 	code.Grow(1000)
 	fmt.Fprintf(&code, "package %s\n", mg.s.GetServiceName())
-	fmt.Fprintf(&code, "import(\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n)\n", "github.com/go-kit/kit/log", "github.com/go-kit/kit/log/level", "fmt", "flag", "net/http", "os", "os/signal", "syscall", "context", "database/sql")
-	fmt.Fprintf(&code, "func Serve(){\nvar httpAddr= flag.String(%q,%q,%q)\nvar logger log.Logger\n{\n\n", "http", ":8080", "http listen address")
+
+	fmt.Fprintf(&code, "import(\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n\n", "github.com/go-kit/kit/log", "github.com/go-kit/kit/log/level", "fmt", "flag", "net/http", "os", "os/signal", "syscall", "context", "database/sql")
+	if mg.s.HasKeys() {
+		fmt.Fprintf(&code, "\n%q", "crypto/tls")
+	}
+	fmt.Fprintf(&code, "\n)")
+
+	fmt.Fprintf(&code, "\nfunc Serve(){\nvar httpAddr= flag.String(%q,%q,%q)\nvar logger log.Logger\n{\n\n", "http", ":8080", "http listen address")
 	fmt.Fprintf(&code, "\nlogger= log.NewLogfmtLogger(os.Stderr)\nlogger=log.NewSyncLogger(logger)\nlogger= log.With(logger,\n%q,%q,\n%q, log.DefaultTimestampUTC,\n%q, log.DefaultCaller,\n)\n}", "service", mg.s.GetServiceName(), "time", "caller")
 	fmt.Fprintf(&code, "\nlevel.Info(logger).Log(%q,%q)", "msg", "service started")
 	fmt.Fprintf(&code, "\ndefer level.Info(logger).Log(%q,%q)", "msg", "service ended")
@@ -71,8 +80,30 @@ func (mg *mainCodeGenerator) generateCode() {
 	fmt.Fprintf(&code, "\nc := make(chan os.Signal,1)\n signal.Notify(c,syscall.SIGINT, syscall.SIGTERM)\nerrs<- fmt.Errorf(%q,<-c)\n}()", "%s")
 	fmt.Fprintf(&code, "\nendpoints:=MakeEndpoints(service)")
 	fmt.Fprintf(&code, "\ngo func(){\nfmt.Println(%q,*httpAddr)", "Listening on port")
+	if mg.s.HasKeys() {
+		fmt.Fprintf(&code, "\n//TODO: fill cert and key names")
+		fmt.Fprintf(&code, "\ncert,error:=tls.LoadX509KeyPair(%q,%q)", "../keys/*.crt", "../keys/*.key")
+		fmt.Fprintf(&code, "\nerrs<-error")
+
+	}
+
 	fmt.Fprintf(&code, "\nhandler:=NewHTTPServer(ctx,endpoints)\n")
-	fmt.Fprintf(&code, "\nerrs <- http.ListenAndServe(*httpAddr, handler)")
+	fmt.Fprintf(&code, "\nserver:= &http.Server{\n")
+	fmt.Fprintf(&code, "\nAddr:*httpAddr,")
+	fmt.Fprintf(&code, "\nHandler: handler,")
+	if mg.s.HasKeys() {
+		fmt.Fprintf(&code, "\nTLSConfig: &tls.Config{")
+		fmt.Fprintf(&code, "\nCertificates:[] tls.Certificate{cert},},")
+	}
+	fmt.Fprintf(&code, "\n}")
+	if mg.s.HasKeys() {
+		fmt.Fprintf(&code, "\nerrs <- server.ListenAndServeTLS(%q,%q)", "", "")
+
+	} else {
+		fmt.Fprintf(&code, "\nerrs <- server.ListenAndServe()")
+
+	}
+
 	fmt.Fprintf(&code, "\n}()")
 	fmt.Fprintf(&code, "\nlevel.Error(logger).Log(%q, <-errs)\n}", "exit")
 	mg.code = code.String()

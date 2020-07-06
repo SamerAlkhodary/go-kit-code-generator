@@ -25,6 +25,9 @@ func createEndpointGenerator(s model.Service, outputFile string) fileGenerator {
 		s:          s,
 	}
 }
+func (eg *endpointsGenerator) GetFileName() string {
+	return eg.outputFile
+}
 
 func (eg *endpointsGenerator) generateCode() {
 	var code strings.Builder

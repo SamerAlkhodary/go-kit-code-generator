@@ -26,6 +26,9 @@ func (mg *modelGenerator) run(outputPath string) {
 	mg.generateCode()
 	mg.generateFile(outputPath)
 }
+func (mg *modelGenerator) GetFileName() string {
+	return mg.outputFile
+}
 
 func (mg *modelGenerator) generateCode() {
 	var code strings.Builder

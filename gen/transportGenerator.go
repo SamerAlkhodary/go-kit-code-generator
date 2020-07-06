@@ -22,6 +22,9 @@ func createTransportGenerator(s model.Service, outputFile string) fileGenerator 
 		s:          s,
 	}
 }
+func (tg *transportGenerator) GetFileName() string {
+	return tg.outputFile
+}
 
 func (tg *transportGenerator) run(outputPath string) {
 

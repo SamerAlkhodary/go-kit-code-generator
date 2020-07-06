@@ -22,6 +22,9 @@ func createEncodersGenerator(s model.Service, outputFile string) fileGenerator {
 		s:          s,
 	}
 }
+func (eg *encoderDecoderGenerator) GetFileName() string {
+	return eg.outputFile
+}
 
 func (eg *encoderDecoderGenerator) run(outputPath string) {
 	eg.generateCode()

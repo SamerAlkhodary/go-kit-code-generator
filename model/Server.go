@@ -14,6 +14,7 @@ type Service struct {
 	Models     []*Model   `yaml:"model"`
 	Repository Repository `yaml:"repository"`
 	RedisCache Cache      `yaml:"redis_cache"`
+	Keys       bool       `yaml:"keys"`
 }
 type Cache struct {
 	Host     string `yaml:"host"`
@@ -85,6 +86,9 @@ func (s *Service) IsNativeType(typ string) bool {
 
 	return goTypes[typ]
 
+}
+func (s *Service) HasKeys() bool {
+	return s.Keys
 }
 func (s *Service) IsAddedType(typ string) bool {
 	if val, ok := goTypes[typ]; ok {

@@ -143,6 +143,10 @@ func (sg *serviceGenerator) generateCode() {
 	sg.code = code.String()
 
 }
+func (sg *serviceGenerator) GetFileName() string {
+	return sg.outputFile
+}
+
 func (sg *serviceGenerator) generateFile(outputPath string) {
 	var path string
 

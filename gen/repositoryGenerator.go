@@ -67,6 +67,10 @@ func (rg *repositroyGenerator) generateCode() {
 
 	rg.code = code.String()
 }
+func (rg *repositroyGenerator) GetFileName() string {
+	return rg.outputFile
+}
+
 func (rg *repositroyGenerator) generateFile(outputPath string) {
 	if !rg.s.Repository.Value {
 		log.Println(("no repository required"))
