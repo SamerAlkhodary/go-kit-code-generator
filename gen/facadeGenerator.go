@@ -35,7 +35,7 @@ func (mg *mainCodeGenerator) generateCode() {
 	code.Grow(1000)
 	fmt.Fprintf(&code, "package %s\n", mg.s.GetServiceName())
 
-	fmt.Fprintf(&code, "import(\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n\n", "github.com/go-kit/kit/log", "github.com/go-kit/kit/log/level", "fmt", "flag", "net/http", "os", "os/signal", "syscall", "context", "database/sql")
+	fmt.Fprintf(&code, "import(\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q\n%q", "io/ioutil", "crypto/x509", "github.com/go-kit/kit/log", "github.com/go-kit/kit/log/level", "fmt", "flag", "net/http", "errors", "os", "os/signal", "syscall", "context", "database/sql")
 	if mg.s.HasKeys() {
 		fmt.Fprintf(&code, "\n%q", "crypto/tls")
 	}
@@ -81,8 +81,16 @@ func (mg *mainCodeGenerator) generateCode() {
 	fmt.Fprintf(&code, "\nendpoints:=MakeEndpoints(service)")
 	fmt.Fprintf(&code, "\ngo func(){\nfmt.Println(%q,*httpAddr)", "Listening on port")
 	if mg.s.HasKeys() {
-		fmt.Fprintf(&code, "\n//TODO: fill cert and key names")
-		fmt.Fprintf(&code, "\ncert,error:=tls.LoadX509KeyPair(%q,%q)", "../keys/*.crt", "../keys/*.key")
+
+		fmt.Fprintf(&code, "\ncaCert,e:= ioutil.ReadFile(%q)", "../keys/ca.crt")
+		fmt.Fprintf(&code, "\nerrs<-e")
+		fmt.Fprintf(&code, "\nroots:= x509.NewCertPool()")
+		fmt.Fprintf(&code, "\nok:= roots.AppendCertsFromPEM([]byte(caCert))")
+		fmt.Fprintf(&code, "\nif !ok{")
+		fmt.Fprintf(&code, "\nerrs <- errors.New(%q)\n}", "unable to convert ca cert to pem")
+		key := fmt.Sprintf("../%s.key", mg.s.GetServiceName())
+		cert := fmt.Sprintf("../%s.crt", mg.s.GetServiceName())
+		fmt.Fprintf(&code, "\ncert,error:=tls.LoadX509KeyPair(%q,%q)", cert, key)
 		fmt.Fprintf(&code, "\nerrs<-error")
 
 	}
@@ -93,7 +101,9 @@ func (mg *mainCodeGenerator) generateCode() {
 	fmt.Fprintf(&code, "\nHandler: handler,")
 	if mg.s.HasKeys() {
 		fmt.Fprintf(&code, "\nTLSConfig: &tls.Config{")
-		fmt.Fprintf(&code, "\nCertificates:[] tls.Certificate{cert},},")
+		fmt.Fprintf(&code, "\nCertificates:[] tls.Certificate{cert},")
+		fmt.Fprintf(&code, "\nClientCAs: roots,")
+		fmt.Fprintf(&code, "\nClientAuth: tls.RequireAndVerifyClientCert,\n},")
 	}
 	fmt.Fprintf(&code, "\n}")
 	if mg.s.HasKeys() {

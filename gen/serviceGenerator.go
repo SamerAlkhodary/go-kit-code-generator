@@ -105,7 +105,7 @@ func (sg *serviceGenerator) generateCode() {
 		fmt.Fprintf(&code, "error){\n")
 		if sg.s.Repository.Value {
 			for _, out := range endpoint.GetOutputs() {
-				fmt.Fprintf(&code, "logger:= log.With(s.logger,%q,%q)\n", "method", endpoint.GetName())
+
 				fmt.Fprintf(&code, "%s,", sg.s.GetVariableName(out, true))
 
 			}
@@ -114,6 +114,8 @@ func (sg *serviceGenerator) generateCode() {
 				fmt.Fprintf(&code, "%s,", sg.s.GetVariableName(arg, true))
 			}
 			fmt.Fprintf(&code, "ctx)\n")
+			fmt.Fprintf(&code, "logger:= log.With(s.logger,%q,%q)\n", "method", endpoint.GetName())
+
 			fmt.Fprintf(&code, "\nif err!=nil{")
 			fmt.Fprintf(&code, "\nlevel.Error(logger).Log(%q,err)\n", "err")
 			fmt.Fprintf(&code, "\n//TODO: fix return")
